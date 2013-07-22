@@ -2,6 +2,9 @@
 
 import requests
 import json
+import sys
+
+test_params = {"host":"MylabTestHost",}
 
 def make_request_url(server):
   return "http://" + server + "/zabbix/api_jsonrpc.php"
@@ -14,6 +17,7 @@ def check_zabbix_api_response(res, url):
   res_json = res.json()
   if "error" in res_json:
     print "Failed to get auth token: %d: %s, res: %s" % (res.status_code, url, res.text)
+  return res_json
 
 def get_auth_token(server):
   headers = {'content-type': 'application/json'}
@@ -26,9 +30,62 @@ def get_auth_token(server):
   }
   url = make_request_url(server)
   res = requests.post(url, data=json.dumps(payload), headers=headers)
-  check_zabbix_api_response(res, url)
-  res_json = res.json()
+  res_json = check_zabbix_api_response(res, url)
   return res_json["result"]
+
+def host_exists(server, auth_token, host):
+  headers = {'content-type': 'application/json'}
+  url = make_request_url(server)
+  payload = {
+    "auth":auth_token,
+    "method":"host.exists",
+    "id":1,
+    "params":{
+      "host":host,
+    },
+    "jsonrpc":"2.0",
+  }
+  res = requests.post(url, data=json.dumps(payload), headers=headers)
+  res_json = check_zabbix_api_response(res, url)
+  return res_json["result"];
+
+def host_get(server, auth_token, host):
+  headers = {'content-type': 'application/json'}
+  url = make_request_url(server)
+  payload = {
+    "auth":auth_token,
+    "method":"host.get",
+    "id":1,
+    "params": {
+        "output": "extend",
+        "filter": {"host":[host]},
+    },
+    "jsonrpc":"2.0",
+  }
+  res = requests.post(url, data=json.dumps(payload), headers=headers)
+  res_json = check_zabbix_api_response(res, url)
+
+  # check the result
+  num_hosts = len(res_json["result"])
+  if num_hosts == 0:
+    return None
+  elif num_hosts != 1:
+    print "The number of returned host is not one (%d)" % num_hosts
+    raise AssertionError
+  return res_json["result"][0]
+
+def delete_host(server, auth_token, hostid):
+  headers = {'content-type': 'application/json'}
+  url = make_request_url(server)
+  payload = {
+    "auth":auth_token,
+    "method":"host.delete",
+    "id":1,
+    "params":[{"hostid":hostid}],
+    "jsonrpc":"2.0",
+  }
+  res = requests.post(url, data=json.dumps(payload), headers=headers)
+  res_json = check_zabbix_api_response(res, url)
 
 def create_host(server, auth_token):
   headers = {'content-type': 'application/json'}
@@ -38,7 +95,7 @@ def create_host(server, auth_token):
     "method":"host.create",
     "id":1,
     "params":{
-      "host":"MylabTestHost",
+      "host":test_params["host"],
       "groups": [{"groupid": "2"}],
       "interfaces": [{
         "type": 1,
@@ -48,11 +105,13 @@ def create_host(server, auth_token):
         "dns": "",
         "port": "10050"
       }],
+      "ipmi_authtype":2,
+      "ipmi_password":"foo",
     },
     "jsonrpc":"2.0",
   }
   res = requests.post(url, data=json.dumps(payload), headers=headers)
-  check_zabbix_api_response(res, url)
+  res_json = check_zabbix_api_response(res, url)
 
 # main code
 target_zabbix_server = "localhost"
@@ -60,5 +119,13 @@ print "Target Zabbix Server: %s" % target_zabbix_server
 auth_token = get_auth_token(target_zabbix_server)
 print "AuthToken           : %s" % auth_token
 
+# check if the host exists
+host = host_get(target_zabbix_server, auth_token, test_params["host"])
+print "Check test host     : %s" % (not not host)
+if host:
+  delete_host(target_zabbix_server, auth_token, host["hostid"])
+  print "Deleted host        : %s" % host["host"]
+
 # create host
 create_host(target_zabbix_server, auth_token)
+print "Created host        : %s" % test_params["host"]
