@@ -4,19 +4,23 @@ import requests
 import json
 import sys
 
-test_params = {"host":"MylabTestHost",}
+test_params = {
+  "host":"MylabTestHost",
+  "proxy-host":"MylabTestProxy"
+}
 
 def make_request_url(server):
   return "http://" + server + "/zabbix/api_jsonrpc.php"
 
 def check_zabbix_api_response(res, url):
   if res.status_code != requests.codes.ok:
-    print "Failed to get auth token: %d: %s, res: %s" % (res.status_code, url, res.text)
+    print "Error: HTTP: %d: %s, res: %s" % (res.status_code, url, res.text)
     raise IOError
 
   res_json = res.json()
   if "error" in res_json:
-    print "Failed to get auth token: %d: %s, res: %s" % (res.status_code, url, res.text)
+    print "Error: ZABBIX API: %d: %s, res: %s" % (res.status_code, url, res.text)
+    raise IOError
   return res_json
 
 def get_auth_token(server):
@@ -87,7 +91,40 @@ def delete_host(server, auth_token, hostid):
   res = requests.post(url, data=json.dumps(payload), headers=headers)
   res_json = check_zabbix_api_response(res, url)
 
-def create_host(server, auth_token):
+def create_proxy(server, auth_token, host):
+  headers = {'content-type': 'application/json'}
+  url = make_request_url(server)
+  payload = {
+    "auth":auth_token,
+    "method":"host.create",
+    "id":1,
+    "params":{
+      "host":host,
+      "groups": [{"groupid": "2"}],
+      "interfaces": [{
+        "type": 1,
+        "main": 1,
+        "useip": 1,
+        "ip": "192.168.1.33",
+        "dns": "",
+        "port": "10050"
+      }],
+    },
+    "jsonrpc":"2.0",
+  }
+  res = requests.post(url, data=json.dumps(payload), headers=headers)
+  res_json = check_zabbix_api_response(res, url)
+
+  # check the result
+  num_hosts = len(res_json["result"]["hostids"])
+  if num_hosts == 0:
+    return None
+  elif num_hosts != 1:
+    print "The number of returned host is not one (%d)" % num_hosts
+    raise AssertionError
+  return res_json["result"]["hostids"][0]
+
+def create_host(server, auth_token, proxyid):
   headers = {'content-type': 'application/json'}
   url = make_request_url(server)
   payload = {
@@ -105,8 +142,13 @@ def create_host(server, auth_token):
         "dns": "",
         "port": "10050"
       }],
-      "ipmi_authtype":2,
+      "ipmi_authtype":1,  # available
       "ipmi_password":"foo",
+      "ipmi_privilege":3, # admin
+      "ipmi_username":"himawari",
+      "name":"Green Tea",
+      "proxy_hostid":proxyid,
+      "status":1, # unmonitored host
     },
     "jsonrpc":"2.0",
   }
@@ -126,6 +168,15 @@ if host:
   delete_host(target_zabbix_server, auth_token, host["hostid"])
   print "Deleted host        : %s" % host["host"]
 
+# create host for proxy if it doesnot exist
+proxy = host_get(target_zabbix_server, auth_token, test_params["proxy-host"])
+print "Check test proxy    : %s" % (not not proxy)
+if proxy:
+  proxyid = proxy["hostid"]
+else:
+  proxyid = create_proxy(target_zabbix_server, auth_token, test_params["proxy-host"])
+  print "Created proxy       : %s" % host["proxy-host"]
+
 # create host
-create_host(target_zabbix_server, auth_token)
+create_host(target_zabbix_server, auth_token, proxyid)
 print "Created host        : %s" % test_params["host"]
