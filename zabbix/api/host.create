@@ -1,0 +1,64 @@
+#!/usr/bin/env python
+
+import requests
+import json
+
+def make_request_url(server):
+  return "http://" + server + "/zabbix/api_jsonrpc.php"
+
+def check_zabbix_api_response(res, url):
+  if res.status_code != requests.codes.ok:
+    print "Failed to get auth token: %d: %s, res: %s" % (res.status_code, url, res.text)
+    raise IOError
+
+  res_json = res.json()
+  if "error" in res_json:
+    print "Failed to get auth token: %d: %s, res: %s" % (res.status_code, url, res.text)
+
+def get_auth_token(server):
+  headers = {'content-type': 'application/json'}
+  payload = {
+    "auth":None,
+    "method":"user.login",
+    "id":1,
+    "params":{"password":"zabbix", "user":"admin"},
+    "jsonrpc":"2.0",
+  }
+  url = make_request_url(server)
+  res = requests.post(url, data=json.dumps(payload), headers=headers)
+  check_zabbix_api_response(res, url)
+  res_json = res.json()
+  return res_json["result"]
+
+def create_host(server, auth_token):
+  headers = {'content-type': 'application/json'}
+  url = make_request_url(server)
+  payload = {
+    "auth":auth_token,
+    "method":"host.create",
+    "id":1,
+    "params":{
+      "host":"MylabTestHost",
+      "groups": [{"groupid": "2"}],
+      "interfaces": [{
+        "type": 1,
+        "main": 1,
+        "useip": 1,
+        "ip": "192.168.1.33",
+        "dns": "",
+        "port": "10050"
+      }],
+    },
+    "jsonrpc":"2.0",
+  }
+  res = requests.post(url, data=json.dumps(payload), headers=headers)
+  check_zabbix_api_response(res, url)
+
+# main code
+target_zabbix_server = "localhost"
+print "Target Zabbix Server: %s" % target_zabbix_server
+auth_token = get_auth_token(target_zabbix_server)
+print "AuthToken           : %s" % auth_token
+
+# create host
+create_host(target_zabbix_server, auth_token)
