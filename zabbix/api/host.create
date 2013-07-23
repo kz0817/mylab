@@ -9,6 +9,9 @@ test_params = {
   "proxy-host":"MylabTestProxy"
 }
 
+group_linux_servers = 2
+templateid_os_linux = 10001
+
 def make_request_url(server):
   return "http://" + server + "/zabbix/api_jsonrpc.php"
 
@@ -133,7 +136,7 @@ def create_host(server, auth_token, proxyid):
     "id":1,
     "params":{
       "host":test_params["host"],
-      "groups": [{"groupid": "2"}],
+      "groups": [{"groupid":group_linux_servers}],
       "interfaces": [{
         "type": 1,
         "main": 1,
@@ -142,6 +145,7 @@ def create_host(server, auth_token, proxyid):
         "dns": "",
         "port": "10050"
       }],
+      "templates": [{"templateid": templateid_os_linux}],
       "ipmi_authtype":1,  # available
       "ipmi_password":"foo",
       "ipmi_privilege":3, # admin
@@ -154,6 +158,65 @@ def create_host(server, auth_token, proxyid):
   }
   res = requests.post(url, data=json.dumps(payload), headers=headers)
   res_json = check_zabbix_api_response(res, url)
+  return res_json["result"]["hostids"][0]
+
+def get_interface_id(target_zabbix_server, auth_token, host_id):
+  headers = {'content-type': 'application/json'}
+  url = make_request_url(target_zabbix_server)
+  payload = {
+    "auth":auth_token,
+    "method":"host.get",
+    "id":1,
+    "params": {
+        "output": "extend",
+        "hostids": [host_id],
+        "selectInterfaces": "extend",
+    },
+    "jsonrpc":"2.0",
+  }
+  res = requests.post(url, data=json.dumps(payload), headers=headers)
+  res_json = check_zabbix_api_response(res, url)
+  return res_json["result"][0]["interfaces"].keys()[0] # key is interfaceid
+
+def add_item(server, auth_token, hostid, interfaceid):
+  headers = {'content-type': 'application/json'}
+  url = make_request_url(server)
+  payload = {
+    "auth":auth_token,
+    "method":"item.create",
+    "id":1,
+    "params": {
+        "name": "simple ping",
+        "key_": "icmpping[]",
+        "hostid": hostid,
+        "type": 0,
+        "value_type": 3,
+        "interfaceid": interfaceid,
+        "delay": 30
+    },
+    "jsonrpc":"2.0",
+  }
+  res = requests.post(url, data=json.dumps(payload), headers=headers)
+  res_json = check_zabbix_api_response(res, url)
+  return res_json["result"]["itemids"][0]
+
+def add_trigger(server, auth_token, hostid):
+  headers = {'content-type': 'application/json'}
+  url = make_request_url(server)
+  payload = {
+    "auth":auth_token,
+    "method":"trigger.create",
+    "id":1,
+    "params": {
+      "description": "Context Switch over three times",
+      "expression": "{%s:system.cpu.switches.last(0)}=3" % test_params["host"],
+      #"dependencies": [{"triggerid": "14062"}]
+    },
+    "jsonrpc":"2.0",
+  }
+  res = requests.post(url, data=json.dumps(payload), headers=headers)
+  res_json = check_zabbix_api_response(res, url)
+  return res_json["result"]["triggerids"][0]
 
 # main code
 target_zabbix_server = "localhost"
@@ -178,5 +241,17 @@ else:
   print "Created proxy       : %s" % host["proxy-host"]
 
 # create host
-create_host(target_zabbix_server, auth_token, proxyid)
-print "Created host        : %s" % test_params["host"]
+host_id = create_host(target_zabbix_server, auth_token, proxyid)
+print "Created host        : %s, host ID: %s" % (test_params["host"], host_id)
+
+# get interface id
+interface_id = get_interface_id(target_zabbix_server, auth_token, host_id)
+print "Interface ID        : %s" % interface_id
+
+# add item
+item_id = add_item(target_zabbix_server, auth_token, host_id, interface_id)
+print "Create item         : %s" % item_id
+
+# add trigger
+trigger_id = add_trigger(target_zabbix_server, auth_token, host_id)
+print "Create trigger      : %s" % trigger_id
