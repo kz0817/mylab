@@ -6,11 +6,21 @@ import sys
 
 test_params = {
   "host":"MylabTestHost",
-  "proxy-host":"MylabTestProxy"
+  "proxy-host":"MylabTestProxy",
+  "action-name":"Test Trigger action",
 }
 
 group_linux_servers = 2
 templateid_os_linux = 10001
+OPERATION_TYPE_SEND_MESSAGE = 0
+EVENT_SOURCE_TRIGGER = 0
+EVAL_TYPE_AND_OR = 0
+STATUS_ENABLED = 0
+CONDITION_TYPE_TRIGGER_VALUE = 5
+CONDITION_TYPE_MAINTENANCE = 16
+
+CONDITION_TYPE_OPE_EQUAL = 0
+CONDITION_TYPE_OPE_NOT_IN = 7
 
 def make_request_url(server):
   return "http://" + server + "/zabbix/api_jsonrpc.php"
@@ -152,7 +162,7 @@ def create_host(server, auth_token, proxyid):
       "ipmi_username":"himawari",
       "name":"Green Tea",
       "proxy_hostid":proxyid,
-      "status":1, # unmonitored host
+      "status":0, # monitored host
     },
     "jsonrpc":"2.0",
   }
@@ -218,11 +228,116 @@ def add_trigger(server, auth_token, hostid):
   res_json = check_zabbix_api_response(res, url)
   return res_json["result"]["triggerids"][0]
 
+def add_action(server, auth_token):
+  headers = {'content-type': 'application/json'}
+  url = make_request_url(server)
+  payload = {
+    "auth":auth_token,
+    "method":"action.create",
+    "id":1,
+    "params": {
+      "name": test_params["action-name"],
+      "eventsource": EVENT_SOURCE_TRIGGER,
+      "evaltype": EVAL_TYPE_AND_OR,
+      "status": STATUS_ENABLED,
+      "esc_period": 120,
+      "def_shortdata": "{TRIGGER.NAME}: {TRIGGER.STATUS}",
+      "def_longdata": "{TRIGGER.NAME}: {TRIGGER.STATUS}\r\nLast value: {ITEM.LASTVALUE}\r\n\r\n{TRIGGER.URL}",
+
+      "conditions": [{
+        "conditiontype": CONDITION_TYPE_MAINTENANCE,
+        "operator": CONDITION_TYPE_OPE_NOT_IN, 
+      }, {
+        "conditiontype": CONDITION_TYPE_TRIGGER_VALUE,
+        "operator": CONDITION_TYPE_OPE_EQUAL,
+        "value": "1"
+      },],
+
+      "operations": [{
+        "operationtype": OPERATION_TYPE_SEND_MESSAGE,
+        "esc_period": 0,
+        "esc_step_from": 1,
+        "esc_step_to": 0,
+        "evaltype": EVAL_TYPE_AND_OR,
+        "opmessage_grp": [{"usrgrpid": "7"}],
+        "opmessage": {
+          "default_msg": 1,
+          "mediatypeid": "5" # mymail
+        }
+      }],
+    },
+    "jsonrpc":"2.0",
+  }
+  res = requests.post(url, data=json.dumps(payload), headers=headers)
+  res_json = check_zabbix_api_response(res, url)
+  return res_json["result"]["actionids"][0]
+
+def action_get(server, auth_token, action_name):
+  headers = {'content-type': 'application/json'}
+  url = make_request_url(server)
+  payload = {
+    "auth": auth_token,
+    "method": "action.get",
+    "id": 1,
+    "params": {
+        "output": "extend",
+        "filter": {
+            "name": action_name,
+        },
+    },
+    "jsonrpc": "2.0",
+  }
+  res = requests.post(url, data=json.dumps(payload), headers=headers)
+  res_json = check_zabbix_api_response(res, url)
+  num_actions = len(res_json["result"])
+  if num_actions == 0:
+    return None
+  elif num_actions != 1:
+    print "The number of returned actions is not one (%d)" % num_actions
+    raise AssertionError
+  return res_json["result"][0]
+
+def delete_action(server, auth_token, actionid):
+  headers = {'content-type': 'application/json'}
+  url = make_request_url(server)
+  payload = {
+    "auth":auth_token,
+    "method":"action.delete",
+    "id":1,
+    "params":[actionid,],
+    "jsonrpc":"2.0",
+  }
+  res = requests.post(url, data=json.dumps(payload), headers=headers)
+  res_json = check_zabbix_api_response(res, url)
+
+def action_seq(server, auth_token):
+
+  # check if the action is already exists
+  action = action_get(server, auth_token, test_params["action-name"])
+  if action:
+    delete_action(server, auth_token, action["actionid"])
+
+  # add action
+  action_id = add_action(target_zabbix_server, auth_token)
+  print "Created action      : %s" % action_id
+
+# ----------------------------------------------------------------------------
 # main code
+# ----------------------------------------------------------------------------
+only_action = False
+for arg in sys.argv:
+  if arg == "--only-action":
+    print "mode: Only Action"
+    only_action = True
+
 target_zabbix_server = "localhost"
 print "Target Zabbix Server: %s" % target_zabbix_server
 auth_token = get_auth_token(target_zabbix_server)
 print "AuthToken           : %s" % auth_token
+
+if only_action:
+  action_seq(target_zabbix_server, auth_token)
+  sys.exit(0)
 
 # check if the host exists
 host = host_get(target_zabbix_server, auth_token, test_params["host"])
@@ -255,3 +370,6 @@ print "Create item         : %s" % item_id
 # add trigger
 trigger_id = add_trigger(target_zabbix_server, auth_token, host_id)
 print "Create trigger      : %s" % trigger_id
+
+# add action
+action_id = action_seq(target_zabbix_server, auth_token)
