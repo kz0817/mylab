@@ -449,7 +449,7 @@ def add_maintenace(server, auth_token, host_id):
   res_json = check_zabbix_api_response(res, url)
   return res_json["result"]["maintenanceids"][0]
 
-def show_events(server, auth_token):
+def show_events(server, auth_token, host_id=None):
   headers = {'content-type': 'application/json'}
   url = make_request_url(server)
   payload = {
@@ -464,9 +464,13 @@ def show_events(server, auth_token):
     },
     "jsonrpc": "2.0",
   }
+  if host_id:
+    payload["params"]["hostids"] = [host_id]
   res = requests.post(url, data=json.dumps(payload), headers=headers)
   res_json = check_zabbix_api_response(res, url)
-  print res_json
+  print "num result: %d" % len(res_json["result"])
+  if host_id:
+    print res_json
 
 
 # ----------------------------------------------------------------------------
@@ -555,3 +559,6 @@ if set_host_maintenance:
     delete_maintenance(target_zabbix_server, auth_token, maintenance["maintenanceid"])
   maintenance_id = add_maintenace(target_zabbix_server, auth_token, host_id)
   print "Maintenace:          : %s" % maintenance_id
+
+# show events
+show_events(target_zabbix_server, auth_token, host_id)
