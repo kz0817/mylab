@@ -374,8 +374,6 @@ def user_media_seq(server, auth_token):
   print "Added user media    : %s" % media_id
   return media_id
 
-  delete_maintenance_if_exists(target_zabbix_server, auth_token, test_params["maintenance-name"])
-
 def get_maintenance(server, auth_token, host_id):
   headers = {'content-type': 'application/json'}
   url = make_request_url(server)
