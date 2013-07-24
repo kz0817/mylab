@@ -449,6 +449,11 @@ def add_maintenace(server, auth_token, host_id):
   res_json = check_zabbix_api_response(res, url)
   return res_json["result"]["maintenanceids"][0]
 
+def show_one_event(event):
+  print "[%s] EventID: %5s, Object ID:%5s (%s), value: %s, source: %s" % \
+  (time.ctime(int(event["clock"])), event["eventid"],
+   event["objectid"], event["object"], event["value"], event["source"])
+
 def show_events(server, auth_token, host_id=None):
   headers = {'content-type': 'application/json'}
   url = make_request_url(server)
@@ -470,7 +475,8 @@ def show_events(server, auth_token, host_id=None):
   res_json = check_zabbix_api_response(res, url)
   print "num result: %d" % len(res_json["result"])
   if host_id:
-    print res_json
+    for event in res_json["result"]:
+      show_one_event(event)
 
 
 # ----------------------------------------------------------------------------
