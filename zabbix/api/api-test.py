@@ -449,6 +449,25 @@ def add_maintenace(server, auth_token, host_id):
   res_json = check_zabbix_api_response(res, url)
   return res_json["result"]["maintenanceids"][0]
 
+def show_events(server, auth_token):
+  headers = {'content-type': 'application/json'}
+  url = make_request_url(server)
+  payload = {
+    "auth": auth_token,
+    "method": "event.get",
+    "id": 1,
+    "params": {
+        "output": "extend",
+        "select_acknowledges": "extend",
+        "sortfield": "eventid",
+        "sortorder": "DESC"
+    },
+    "jsonrpc": "2.0",
+  }
+  res = requests.post(url, data=json.dumps(payload), headers=headers)
+  res_json = check_zabbix_api_response(res, url)
+  print res_json
+
 
 # ----------------------------------------------------------------------------
 # main code
@@ -456,6 +475,7 @@ def add_maintenace(server, auth_token, host_id):
 only_action = False
 only_user_media = False
 set_host_maintenance = False
+only_show_events = False
 for arg in sys.argv:
   if arg == "--only-action":
     print "mode: Only Action"
@@ -466,6 +486,9 @@ for arg in sys.argv:
   elif arg == "--set-maintenance":
     print "set maintenance"
     set_host_maintenance = True
+  elif arg == "--only-show-events":
+    print "mode: Only show events"
+    only_show_events = True
 
 target_zabbix_server = "localhost"
 print "Target Zabbix Server: %s" % target_zabbix_server
@@ -478,6 +501,10 @@ if only_action:
 
 if only_user_media:
   user_media_seq(target_zabbix_server, auth_token)
+  sys.exit(0)
+
+if only_show_events:
+  show_events(target_zabbix_server, auth_token)
   sys.exit(0)
 
 # check if the host exists
