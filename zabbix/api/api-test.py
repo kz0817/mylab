@@ -6,10 +6,11 @@ import sys
 import time
 
 test_params = {
-  "host":"MylabTestHost",
   "proxy-host":"MylabTestProxy",
   "action-name":"Test Trigger action",
   "maintenance-name":"Test maintenance",
+  "use-alternative-host-name": False,
+  "alternative-host-name": None,
 }
 
 GROUP_LINUX_SERVERS = 2
@@ -24,6 +25,16 @@ CONDITION_TYPE_MAINTENANCE = 16
 
 CONDITION_TYPE_OPE_EQUAL = 0
 CONDITION_TYPE_OPE_NOT_IN = 7
+
+def get_host_name():
+  name = "MylabTestHost"
+  if test_params["use-alternative-host-name"]:
+    if test_params["alternative-host-name"]:
+      name = test_params["alternative-host-name"]
+    else:
+      name += time.strftime("%m%d%H%M%S")
+      test_params["alternative-host-name"] = name
+  return name
 
 def make_request_url(server):
   return "http://" + server + "/zabbix/api_jsonrpc.php"
@@ -148,7 +159,7 @@ def create_host(server, auth_token, proxyid):
     "method":"host.create",
     "id":1,
     "params":{
-      "host":test_params["host"],
+      "host": get_host_name(),
       "groups": [{"groupid":GROUP_LINUX_SERVERS}],
       "interfaces": [{
         "type": 1,
@@ -163,7 +174,7 @@ def create_host(server, auth_token, proxyid):
       "ipmi_password":"foo",
       "ipmi_privilege":3, # admin
       "ipmi_username":"himawari",
-      "name":"Green Tea",
+      #"name":"Green Tea",
       "proxy_hostid":proxyid,
       "status":0, # monitored host
     },
@@ -239,7 +250,7 @@ def add_trigger(server, auth_token, hostid):
     "id":1,
     "params": {
       "description": "Context Switch over three times",
-      "expression": "{%s:system.cpu.switches.last(0)}=3" % test_params["host"],
+      "expression": "{%s:system.cpu.switches.last(0)}=3" % get_host_name(),
       #"dependencies": [{"triggerid": "14062"}]
     },
     "jsonrpc":"2.0",
@@ -383,8 +394,8 @@ def get_maintenance(server, auth_token, host_id):
     "id": 1,
       "params": {
         "output": "extend",
-        #"selectGroups": "extend",
-        #"hostids": host_id,
+        "selectHosts": "extend",
+        "selectGroups": "extend",
     },
     "jsonrpc": "2.0",
   },
@@ -419,7 +430,7 @@ def delete_maintenance(server, auth_token, maintenance_id):
   res_json = check_zabbix_api_response(res, url)
 
 
-def add_maintenace(server, auth_token, host_id):
+def create_maintenace(server, auth_token, host_id):
   headers = {'content-type': 'application/json'}
   url = make_request_url(server)
   payload = {
@@ -442,6 +453,33 @@ def add_maintenace(server, auth_token, host_id):
         ]
     },
     "jsonrpc": "2.0",
+  }
+  res = requests.post(url, data=json.dumps(payload), headers=headers)
+  res_json = check_zabbix_api_response(res, url)
+  return res_json["result"]["maintenanceids"][0]
+
+def add_maintenace(server, auth_token, maintenance, host_id):
+
+  maintenance_id = maintenance["maintenanceid"]
+  print maintenance
+  sys.exit(1)
+
+  headers = {'content-type': 'application/json'}
+  url = make_request_url(server)
+  payload = {
+    "auth": auth_token,
+    "method": "maintenance.update",
+    "id": 1,
+    "params": {
+      "params": {
+      "maintenanceid": maintenance_id,
+      "hostids": [
+            "10085",
+            "10084"
+        ]
+      },
+      "jsonrpc": "2.0",
+    }
   }
   res = requests.post(url, data=json.dumps(payload), headers=headers)
   res_json = check_zabbix_api_response(res, url)
@@ -483,20 +521,28 @@ def show_events(server, auth_token, host_id=None):
 only_action = False
 only_user_media = False
 set_host_maintenance = False
+add_host_maintenance = False
 only_show_events = False
+
 for arg in sys.argv:
   if arg == "--only-action":
-    print "mode: Only Action"
+    print "### mode: Only Action"
     only_action = True
   elif arg == "--only-user-media":
-    print "mode: Only user media"
+    print "### mode: Only user media"
     only_user_media = True
   elif arg == "--set-maintenance":
-    print "set maintenance"
+    print "*** Set maintenance"
     set_host_maintenance = True
+  elif arg == "--add-maintenance":
+    print "*** Add maintenance"
+    add_host_maintenance = True
   elif arg == "--only-show-events":
-    print "mode: Only show events"
+    print "### mode: Only show events"
     only_show_events = True
+  elif arg == "--alternative-host":
+    print "*** Altenative host"
+    test_params["use-alternative-host-name"] = True;
 
 target_zabbix_server = "localhost"
 print "Target Zabbix Server: %s" % target_zabbix_server
@@ -516,7 +562,7 @@ if only_show_events:
   sys.exit(0)
 
 # check if the host exists
-host = host_get(target_zabbix_server, auth_token, test_params["host"])
+host = host_get(target_zabbix_server, auth_token, get_host_name())
 print "Check test host     : %s" % (not not host)
 if host:
   delete_host(target_zabbix_server, auth_token, host["hostid"])
@@ -533,7 +579,7 @@ else:
 
 # create host
 host_id = create_host(target_zabbix_server, auth_token, proxyid)
-print "Created host        : %s, host ID: %s" % (test_params["host"], host_id)
+print "Created host        : %s, host ID: %s" % (get_host_name(), host_id)
 
 # get interface id
 interface_id = get_interface_id(target_zabbix_server, auth_token, host_id)
@@ -556,12 +602,18 @@ action_id = action_seq(target_zabbix_server, auth_token)
 # add media
 media_id = user_media_seq(target_zabbix_server, auth_token)
 
-# set maintenance
-if set_host_maintenance:
+# set maintenance or add maintenance
+if set_host_maintenance or add_host_maintenance:
   maintenance = get_maintenance(target_zabbix_server, auth_token, host_id)
-  if maintenance:
-    delete_maintenance(target_zabbix_server, auth_token, maintenance["maintenanceid"])
-  maintenance_id = add_maintenace(target_zabbix_server, auth_token, host_id)
+  if maintenance and set_host_maintenance:
+    delete_maintenance(target_zabbix_server, auth_token, \
+                       maintenance["maintenanceid"])
+  if set_host_maintenance or not maintenance:
+    maintenance_id = create_maintenace(target_zabbix_server, auth_token, \
+                                       host_id)
+  else:
+    maintenance_id = add_maintenace(target_zabbix_server, auth_token, \
+                                    maintenance, host_id)
   print "Maintenace:          : %s" % maintenance_id
 
 # show events
