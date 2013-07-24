@@ -3,11 +3,13 @@
 import requests
 import json
 import sys
+import time
 
 test_params = {
   "host":"MylabTestHost",
   "proxy-host":"MylabTestProxy",
   "action-name":"Test Trigger action",
+  "maintenance-name":"Test maintenance",
 }
 
 group_linux_servers = 2
@@ -16,6 +18,7 @@ OPERATION_TYPE_SEND_MESSAGE = 0
 EVENT_SOURCE_TRIGGER = 0
 EVAL_TYPE_AND_OR = 0
 STATUS_ENABLED = 0
+STATUS_DISABLED = 1
 CONDITION_TYPE_TRIGGER_VALUE = 5
 CONDITION_TYPE_MAINTENANCE = 16
 
@@ -210,6 +213,23 @@ def add_item(server, auth_token, hostid, interfaceid):
   res_json = check_zabbix_api_response(res, url)
   return res_json["result"]["itemids"][0]
 
+def disable_item(server, auth_token, item_id):
+  headers = {'content-type': 'application/json'}
+  url = make_request_url(server)
+  payload = {
+    "auth": auth_token,
+    "method": "item.update",
+    "id": 1,
+    "params": {
+        "itemid": item_id,
+        "status": STATUS_DISABLED,
+    },
+    "jsonrpc": "2.0",
+  }
+  res = requests.post(url, data=json.dumps(payload), headers=headers)
+  res_json = check_zabbix_api_response(res, url)
+  return res_json["result"]["itemids"][0]
+
 def add_trigger(server, auth_token, hostid):
   headers = {'content-type': 'application/json'}
   url = make_request_url(server)
@@ -320,15 +340,132 @@ def action_seq(server, auth_token):
   # add action
   action_id = add_action(target_zabbix_server, auth_token)
   print "Created action      : %s" % action_id
+  return action_id
+
+def add_user_media(server, auth_token):
+  user_id = 1 # Admin
+  media_type_id = 5 # mymail
+  mail_addr = "zabbix@localhost"
+
+  headers = {'content-type': 'application/json'}
+  url = make_request_url(server)
+  payload = {
+    "auth": auth_token,
+    "method": "user.addmedia",
+    "id": 1,
+    "params": {
+        "users": [{"userid": user_id},],
+        "medias": {
+            "mediatypeid": media_type_id,
+            "sendto": mail_addr,
+            "active": 0,
+            "severity": 62,
+            "period": "1-7,01:00-23:00"
+        }
+    },
+    "jsonrpc": "2.0",
+  }
+  res = requests.post(url, data=json.dumps(payload), headers=headers)
+  res_json = check_zabbix_api_response(res, url)
+  return res_json["result"]["mediaids"][0]
+
+def user_media_seq(server, auth_token):
+  media_id = add_user_media(server, auth_token)
+  print "Added user media    : %s" % media_id
+  return media_id
+
+  delete_maintenance_if_exists(target_zabbix_server, auth_token, test_params["maintenance-name"])
+
+def get_maintenance(server, auth_token, host_id):
+  headers = {'content-type': 'application/json'}
+  url = make_request_url(server)
+  payload = {
+    "auth": auth_token,
+    "method": "maintenance.get",
+    "id": 1,
+      "params": {
+        "output": "extend",
+        #"selectGroups": "extend",
+        #"hostids": host_id,
+    },
+    "jsonrpc": "2.0",
+  },
+  res = requests.post(url, data=json.dumps(payload), headers=headers)
+  res_json = check_zabbix_api_response(res, url)
+  num_maintenances = len(res_json)
+  if num_maintenances == 0:
+    return None
+  elif num_maintenances != 1:
+    print "The number of returned maintenances is not one (%d)" % num_maintenances
+    raise AssertionError
+
+  result = res_json[0]["result"]
+  num_results = len(result)
+  if num_results == 0:
+    return None
+  elif num_results != 1:
+    print "The number of returned results is not one (%d)" % num_results
+  return result[0]
+
+def delete_maintenance(server, auth_token, maintenance_id):
+  headers = {'content-type': 'application/json'}
+  url = make_request_url(server)
+  payload = {
+    "auth": auth_token,
+    "method": "maintenance.delete",
+    "id": 1,
+    "params": [maintenance_id],
+    "jsonrpc": "2.0",
+  }
+  res = requests.post(url, data=json.dumps(payload), headers=headers)
+  res_json = check_zabbix_api_response(res, url)
+
+
+def add_maintenace(server, auth_token, host_id):
+  headers = {'content-type': 'application/json'}
+  url = make_request_url(server)
+  payload = {
+    "auth": auth_token,
+    "method": "maintenance.create",
+    "id": 1,
+    "params": {
+        "name": test_params["maintenance-name"],
+        "active_since": int(time.time()),
+        "active_till": int(time.time()+3600),
+        "hostids": [host_id],
+        "timeperiods": [
+            {
+                "timeperiod_type": 3,
+                "every": 1,
+                "dayofweek": 64,
+                "start_time": 64800,
+                "period": 3600
+            }
+        ]
+    },
+    "jsonrpc": "2.0",
+  }
+  res = requests.post(url, data=json.dumps(payload), headers=headers)
+  res_json = check_zabbix_api_response(res, url)
+  return res_json["result"]["maintenanceids"][0]
+
 
 # ----------------------------------------------------------------------------
 # main code
 # ----------------------------------------------------------------------------
 only_action = False
+only_user_media = False
+set_host_maintenance = False
 for arg in sys.argv:
   if arg == "--only-action":
     print "mode: Only Action"
     only_action = True
+  elif arg == "--only-user-media":
+    print "mode: Only user media"
+    only_user_media = True
+  elif arg == "--set-maintenance":
+    print "set maintenance"
+    set_host_maintenance = True
 
 target_zabbix_server = "localhost"
 print "Target Zabbix Server: %s" % target_zabbix_server
@@ -337,6 +474,10 @@ print "AuthToken           : %s" % auth_token
 
 if only_action:
   action_seq(target_zabbix_server, auth_token)
+  sys.exit(0)
+
+if only_user_media:
+  user_media_seq(target_zabbix_server, auth_token)
   sys.exit(0)
 
 # check if the host exists
@@ -365,7 +506,10 @@ print "Interface ID        : %s" % interface_id
 
 # add item
 item_id = add_item(target_zabbix_server, auth_token, host_id, interface_id)
-print "Create item         : %s" % item_id
+
+# disable item
+item_id = disable_item(target_zabbix_server, auth_token, item_id)
+print "Disabled item       : %s" % item_id
 
 # add trigger
 trigger_id = add_trigger(target_zabbix_server, auth_token, host_id)
@@ -373,3 +517,14 @@ print "Create trigger      : %s" % trigger_id
 
 # add action
 action_id = action_seq(target_zabbix_server, auth_token)
+
+# add media
+media_id = user_media_seq(target_zabbix_server, auth_token)
+
+# set maintenance
+if set_host_maintenance:
+  maintenance = get_maintenance(target_zabbix_server, auth_token, host_id)
+  if maintenance:
+    delete_maintenance(target_zabbix_server, auth_token, maintenance["maintenanceid"])
+  maintenance_id = add_maintenace(target_zabbix_server, auth_token, host_id)
+  print "Maintenace:          : %s" % maintenance_id
