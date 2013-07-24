@@ -429,7 +429,7 @@ def add_maintenace(server, auth_token, host_id):
     "params": {
         "name": test_params["maintenance-name"],
         "active_since": int(time.time()),
-        "active_till": int(time.time()+3600),
+        "active_till": int(time.time()+3600*24),
         "hostids": [host_id],
         "timeperiods": [
             {
