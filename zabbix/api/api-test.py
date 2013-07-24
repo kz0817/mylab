@@ -12,8 +12,8 @@ test_params = {
   "maintenance-name":"Test maintenance",
 }
 
-group_linux_servers = 2
-templateid_os_linux = 10001
+GROUP_LINUX_SERVERS = 2
+TEMPLATEID_OS_LINUX = 10001
 OPERATION_TYPE_SEND_MESSAGE = 0
 EVENT_SOURCE_TRIGGER = 0
 EVAL_TYPE_AND_OR = 0
@@ -149,7 +149,7 @@ def create_host(server, auth_token, proxyid):
     "id":1,
     "params":{
       "host":test_params["host"],
-      "groups": [{"groupid":group_linux_servers}],
+      "groups": [{"groupid":GROUP_LINUX_SERVERS}],
       "interfaces": [{
         "type": 1,
         "main": 1,
@@ -158,7 +158,7 @@ def create_host(server, auth_token, proxyid):
         "dns": "",
         "port": "10050"
       }],
-      "templates": [{"templateid": templateid_os_linux}],
+      "templates": [{"templateid": TEMPLATEID_OS_LINUX}],
       "ipmi_authtype":1,  # available
       "ipmi_password":"foo",
       "ipmi_privilege":3, # admin
