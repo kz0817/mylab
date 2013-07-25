@@ -396,6 +396,7 @@ def get_maintenance(server, auth_token, host_id):
         "output": "extend",
         "selectHosts": "extend",
         "selectGroups": "extend",
+        "selectTimeperiods": "extend",
     },
     "jsonrpc": "2.0",
   },
@@ -461,8 +462,10 @@ def create_maintenace(server, auth_token, host_id):
 def add_maintenace(server, auth_token, maintenance, host_id):
 
   maintenance_id = maintenance["maintenanceid"]
-  print maintenance
-  sys.exit(1)
+  timeperiods = maintenance["timeperiods"];
+  if len(timeperiods) == 0:
+    print "Not found time periods"
+    raise AssertionError
 
   headers = {'content-type': 'application/json'}
   url = make_request_url(server)
@@ -471,16 +474,18 @@ def add_maintenace(server, auth_token, maintenance, host_id):
     "method": "maintenance.update",
     "id": 1,
     "params": {
-      "params": {
       "maintenanceid": maintenance_id,
-      "hostids": [
-            "10085",
-            "10084"
-        ]
-      },
-      "jsonrpc": "2.0",
-    }
+      "timeperiods": timeperiods,
+    },
+    "jsonrpc": "2.0",
   }
+
+  # add host ids 
+  hostids = [host_id]
+  for host in maintenance["hosts"]:
+    hostids.append(host["hostid"])
+  payload["params"]["hostids"] = hostids
+
   res = requests.post(url, data=json.dumps(payload), headers=headers)
   res_json = check_zabbix_api_response(res, url)
   return res_json["result"]["maintenanceids"][0]
