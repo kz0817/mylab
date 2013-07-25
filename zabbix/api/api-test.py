@@ -26,6 +26,9 @@ CONDITION_TYPE_MAINTENANCE = 16
 CONDITION_TYPE_OPE_EQUAL = 0
 CONDITION_TYPE_OPE_NOT_IN = 7
 
+TARGET_MEDIA_TYPE_ID = 5 # mymail
+TARGET_MEDIA_USER_ID = 1 # Admin
+
 def get_host_name():
   name = "MylabTestHost"
   if test_params["use-alternative-host-name"]:
@@ -354,8 +357,6 @@ def action_seq(server, auth_token):
   return action_id
 
 def add_user_media(server, auth_token):
-  user_id = 1 # Admin
-  media_type_id = 5 # mymail
   mail_addr = "zabbix@localhost"
 
   headers = {'content-type': 'application/json'}
@@ -365,9 +366,9 @@ def add_user_media(server, auth_token):
     "method": "user.addmedia",
     "id": 1,
     "params": {
-        "users": [{"userid": user_id},],
+        "users": [{"userid": TARGET_MEDIA_USER_ID},],
         "medias": {
-            "mediatypeid": media_type_id,
+            "mediatypeid": TARGET_MEDIA_TYPE_ID,
             "sendto": mail_addr,
             "active": 0,
             "severity": 62,
@@ -386,8 +387,6 @@ def user_media_seq(server, auth_token):
   return media_id
 
 def get_all_user_media_ids(server, auth_token):
-  user_id = 1 # Admin
-  target_media_type_id = 5 # mymail
   headers = {'content-type': 'application/json'}
   url = make_request_url(server)
   payload = {
@@ -395,7 +394,7 @@ def get_all_user_media_ids(server, auth_token):
     "method": "usermedia.get",
     "params": {
         "output": "extend",
-        "userids": user_id,
+        "userids": TARGET_MEDIA_USER_ID,
     },
     "id": 1,
     "jsonrpc": "2.0",
@@ -405,7 +404,7 @@ def get_all_user_media_ids(server, auth_token):
 
   mediaids = [];
   for user_media in res_json["result"]:
-    if int(user_media["mediatypeid"]) != target_media_type_id:
+    if int(user_media["mediatypeid"]) != TARGET_MEDIA_TYPE_ID:
       continue
     mediaid = user_media["mediaid"]
     mediaids.append(mediaid)
@@ -430,6 +429,31 @@ def delete_all_user_media(server, auth_token):
   for mediaid in res_json["result"]["mediaids"]:
     print "%s " % mediaid,
   print ""
+
+def update_all_user_media(server, auth_token):
+  #mediaids = get_all_user_media_ids(server, auth_token)
+
+  headers = {'content-type': 'application/json'}
+  url = make_request_url(server)
+  payload = {
+    "auth": auth_token,
+    "method": "user.updatemedia",
+    "id": 1,
+    "params": {
+      "users": [{"userid": TARGET_MEDIA_USER_ID}],
+      "medias": {
+        "mediatypeid": TARGET_MEDIA_TYPE_ID,
+        "sendto": "kyamato@michi",
+        "active": 0,
+        "severity": 31,
+        "period": "1-6,00:05-18:30"
+      },
+    },
+    "jsonrpc": "2.0",
+  }
+  res = requests.post(url, data=json.dumps(payload), headers=headers)
+  res_json = check_zabbix_api_response(res, url)
+  print res_json
 
 def get_maintenance(server, auth_token, host_id):
   headers = {'content-type': 'application/json'}
@@ -574,6 +598,7 @@ set_host_maintenance = False
 add_host_maintenance = False
 only_show_events = False
 only_delete_all_user_media = False
+only_update_all_user_media = False
 
 for arg in sys.argv:
   if arg == "--only-action":
@@ -597,6 +622,9 @@ for arg in sys.argv:
   elif arg == "--only-delete-all-user-media":
     print "### mode: Only delete all user media"
     only_delete_all_user_media = True
+  elif arg == "--only-update-all-user-media":
+    print "### mode: Only update all user media"
+    only_update_all_user_media = True
 
 target_zabbix_server = "localhost"
 print "Target Zabbix Server: %s" % target_zabbix_server
@@ -617,6 +645,10 @@ if only_show_events:
 
 if only_delete_all_user_media:
   delete_all_user_media(target_zabbix_server, auth_token)
+  sys.exit(0)
+
+if only_update_all_user_media:
+  update_all_user_media(target_zabbix_server, auth_token)
   sys.exit(0)
 
 # check if the host exists
