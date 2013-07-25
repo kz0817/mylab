@@ -385,6 +385,52 @@ def user_media_seq(server, auth_token):
   print "Added user media    : %s" % media_id
   return media_id
 
+def get_all_user_media_ids(server, auth_token):
+  user_id = 1 # Admin
+  target_media_type_id = 5 # mymail
+  headers = {'content-type': 'application/json'}
+  url = make_request_url(server)
+  payload = {
+    "auth": auth_token,
+    "method": "usermedia.get",
+    "params": {
+        "output": "extend",
+        "userids": user_id,
+    },
+    "id": 1,
+    "jsonrpc": "2.0",
+  }
+  res = requests.post(url, data=json.dumps(payload), headers=headers)
+  res_json = check_zabbix_api_response(res, url)
+
+  mediaids = [];
+  for user_media in res_json["result"]:
+    if int(user_media["mediatypeid"]) != target_media_type_id:
+      continue
+    mediaid = user_media["mediaid"]
+    mediaids.append(mediaid)
+  return mediaids;
+
+def delete_all_user_media(server, auth_token):
+  
+  mediaids = get_all_user_media_ids(server, auth_token)
+
+  headers = {'content-type': 'application/json'}
+  url = make_request_url(server)
+  payload = {
+    "auth": auth_token,
+    "method": "user.deletemedia",
+    "id": 1,
+    "params": mediaids,
+    "jsonrpc": "2.0",
+  }
+  res = requests.post(url, data=json.dumps(payload), headers=headers)
+  res_json = check_zabbix_api_response(res, url)
+  print "Deleted media ids: ",
+  for mediaid in res_json["result"]["mediaids"]:
+    print "%s " % mediaid,
+  print ""
+
 def get_maintenance(server, auth_token, host_id):
   headers = {'content-type': 'application/json'}
   url = make_request_url(server)
@@ -429,7 +475,6 @@ def delete_maintenance(server, auth_token, maintenance_id):
   }
   res = requests.post(url, data=json.dumps(payload), headers=headers)
   res_json = check_zabbix_api_response(res, url)
-
 
 def create_maintenace(server, auth_token, host_id):
   headers = {'content-type': 'application/json'}
@@ -528,6 +573,7 @@ only_user_media = False
 set_host_maintenance = False
 add_host_maintenance = False
 only_show_events = False
+only_delete_all_user_media = False
 
 for arg in sys.argv:
   if arg == "--only-action":
@@ -548,6 +594,9 @@ for arg in sys.argv:
   elif arg == "--alternative-host":
     print "*** Altenative host"
     test_params["use-alternative-host-name"] = True;
+  elif arg == "--only-delete-all-user-media":
+    print "### mode: Only delete all user media"
+    only_delete_all_user_media = True
 
 target_zabbix_server = "localhost"
 print "Target Zabbix Server: %s" % target_zabbix_server
@@ -564,6 +613,10 @@ if only_user_media:
 
 if only_show_events:
   show_events(target_zabbix_server, auth_token)
+  sys.exit(0)
+
+if only_delete_all_user_media:
+  delete_all_user_media(target_zabbix_server, auth_token)
   sys.exit(0)
 
 # check if the host exists
