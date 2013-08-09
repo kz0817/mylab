@@ -10,7 +10,7 @@ static void print_usage(void)
 {
 	printf("Usage:\n");
 	printf("\n");
-	printf("$ load [--num-threads N]\n");
+	printf("$ load [--num-threads|-N N]\n");
 	printf("\n");
 }
 
@@ -18,6 +18,7 @@ static void *loop(void *arg)
 {
 	while (true)
 		;
+	return NULL;
 }
 
 int main(int argc, char *argv[])
@@ -30,7 +31,7 @@ int main(int argc, char *argv[])
 			print_usage();
 			return EXIT_SUCCESS;
 		}
-		else if (arg == "--num-threads") {
+		else if (arg == "--num-threads" || arg == "-N") {
 			if (lastArg) {
 				print_usage();
 				return EXIT_FAILURE;
