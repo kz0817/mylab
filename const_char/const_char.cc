@@ -11,6 +11,7 @@ public:
 		printf("[%s]\tConstructor: const char *\n", name.c_str());
 	}
 
+	//Mame(const string &_name) {
 	Mame(const string &_name) {
 		name = _name;
 		printf("[%s]\tConstructor: const string &_name\n", name.c_str());
