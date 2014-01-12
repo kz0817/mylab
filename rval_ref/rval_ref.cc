@@ -1,56 +1,100 @@
 #include <cstdio>
+#include <string>
+using namespace std;
 
 class X {
-	int a;
-public:
-	X(int _a)
-	: a(_a)
-	{
-		printf("default constructor: %d\n", a);
-	}
+	int    val;
+	string name;
 
+public:
 	X(const X &x)
 	{
-		printf("copy constructor\n");
+		name = "No name from ";
+		name += x.name;
+		val = x.val;
+		printf("Copy constructor [%s] %d\n", name.c_str(), val);
 	}
 
-	X(X &&x)
+	X(const string &n, int v)
+	: name(n),
+	  val(v)
 	{
-		printf("move constructor\n");
+		printf("Default constructor w/ Name [%s] %d\n", name.c_str(), val);
+	}
+
+	X(const string &n, const X &x)
+	: name(n)
+	{
+		val = x.val;
+		printf("Copy constructor w/ Name [%s] %d\n", name.c_str(), val);
+	}
+
+	X(const string &n, X &&x)
+	: name(n)
+	{
+		val = x.val;
+		printf("Move constructor [%s] %d\n", name.c_str(), val);
+	}
+
+	X &operator=(const X &rhs)
+	{
+		printf("Operator= : copy [%s:%d] -> [%s:%d]\n",
+		       rhs.name.c_str(), rhs.val, name.c_str(), val);
+		val = rhs.val;
+		return *this;
 	}
 
 	X &operator=(X &&rhs)
 	{
-		printf("ope = &&\n");
-		a = rhs.a;
+		printf("Operator= : move [%s:%d] -> [%s:%d]\n",
+		       rhs.name.c_str(), rhs.val, name.c_str(), val);
+		val = rhs.val;
 		return *this;
 	}
 
 	void print(void)
 	{
-		printf("a: %d\n", a);
+		printf("val: %d\n", val);
 	}
 };
 
-X func(void)
+X func1(void)
 {
-	X t0(5);
-	return t0;
+	X v0(__func__, 5);
+	return v0;
 }
 
 const X func_const(void)
 {
-	return func();
+	return func1();
 }
 
 int main(void)
 {
-	X x1(1);
-	X x2(x1);
-	X x3(3);
-	x3 = func();
-	x3.print();
-	X x4(3);
-	// x4 = func_const(); // build error
+	printf("[x1] ==========\n");
+	X x1("x1", 1);
+	printf("\n");
+
+	printf("[x2] ==========\n");
+	X x2("x2", x1);
+	printf("\n");
+
+	printf("[x2a] ==========\n");
+	X x2a("x2a", move(x1));
+	printf("\n");
+
+	printf("[x3] ==========\n");
+	X x3("x3", 3);
+	x3 = func1();
+	printf("\n");
+
+	printf("[x3a] ==========\n");
+	X x3a("x3a", func1());
+	printf("\n");
+
+	printf("[x4] ==========\n");
+	X x4("x4", 4);
+	x4 = func_const();
+	printf("\n");
 
 }
