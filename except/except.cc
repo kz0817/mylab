@@ -22,9 +22,14 @@ private:
 	const string m_name;
 };
 
+string createName(const string &funcName, const int &val)
+{
+	return str(format("%s:%d") % funcName % val);
+}
+
 int func(int a)
 {
-	X s(str(format("%s:%d") % __func__ % a));
+	X s(createName(__func__, a));
 	if (a % 2)
 		throw a;
 	return a * 3;
