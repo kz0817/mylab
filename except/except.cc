@@ -5,6 +5,19 @@
 using namespace std;
 using namespace boost;
 
+class A {
+public:
+	A(void)
+	{
+		printf("A: const\n");
+	}
+
+	virtual ~A(void)
+	{
+		printf("A: dest\n");
+	}
+};
+
 class X {
 public:
 	X(const string &name)
@@ -31,7 +44,7 @@ int func(int a)
 {
 	X s(createName(__func__, a));
 	if (a % 2)
-		throw a;
+		throw A();
 	return a * 3;
 }
 
@@ -46,8 +59,11 @@ int main(int argc, char *argv[])
 
 	try {
 		printf("%d\n", func(val));
+	} catch (const A &e) {
+		printf("Catch A exception\n");
 	} catch (...) {
 		printf("Catch an exception\n");
 	}
+	pintf("Go exit\n");
 	return EXIT_SUCCESS;
 }
