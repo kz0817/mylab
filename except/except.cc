@@ -64,6 +64,6 @@ int main(int argc, char *argv[])
 	} catch (...) {
 		printf("Catch an exception\n");
 	}
-	pintf("Go exit\n");
+	printf("Go exit\n");
 	return EXIT_SUCCESS;
 }
