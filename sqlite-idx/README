@@ -1,0 +1,8 @@
+How to use
+
+$ sqlite3 tmp.db     (DB name is arbitary)
+
+sqlite>.read script.sql
+
+** To see the plan
+sqlite> explain query plan select * from table_name
