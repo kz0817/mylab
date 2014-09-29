@@ -9,7 +9,11 @@ public:
 	{
 	}
 
-	T *operator->() {
+	T *get(void) {
+		return m_ptr;
+	}
+
+	T *get_const(void) const {
 		return m_ptr;
 	}
 
@@ -26,15 +30,17 @@ int main(void)
 	Foo foo;
 	foo.x = 5;
 	Ptr<Foo> fooPtr(&foo);
-	fooPtr->x = 10;
+	fooPtr.get()->x = 10;
 
 	Ptr<const Foo> constFooPtr(&foo);
-	printf("constFooPtr->x: %d\n", constFooPtr->x); // read OK.
+	printf("constFooPtr->x: %d\n", constFooPtr.get()->x); // read OK.
 	// constFooPtr->x = 20; // Write NG. Build error.
+	// constFooPtr.get_const()->x = 20; // NG. Build error.
 
 	const Ptr<Foo> constPtrFoo(&foo);
-	printf("constPtrFoo->x: %d\n", constFooPtr->x); // read OK.
-	constPtrFoo->x = 20; // Write OK.
+	printf("constPtrFoo->x: %d\n", constFooPtr.get()->x); // read OK.
+	// constPtrFoo.get()->x = 20; // Write NG. Build error
+	constPtrFoo.get_const()->x = 20; // OK.
 
 	return EXIT_SUCCESS;
 }
