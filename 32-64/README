@@ -1,0 +1,3 @@
+If build fails, following command may resolve it.
+
+$ sudo apt-get install gcc-multilib
