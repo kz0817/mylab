@@ -1,4 +1,3 @@
-import scala.collection.mutable.ListBuffer
 import java.io.InputStreamReader
 
 object ConvUtf8MacUtf8 {
