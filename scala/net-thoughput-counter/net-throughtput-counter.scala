@@ -14,13 +14,26 @@ object Main {
     val sendPkts  = _sendPkts
     val date = new Date()
 
+    def formatRate(rate: Double): (Double, String) = {
+      val units = List("  B", "KiB", "MiB", "GiB", "TiB", "EiB")
+      var r = rate
+      for (u <- units) {
+         if (r < 1000 || u == units.last)
+           return (r, u)
+         r /= 1024
+      }
+      (-1, "ERR")
+    }
+
     def diffInfo(counter:Counter): String = {
       val diffSec = (counter.date.getTime() - date.getTime()) / 1000.0
       val diffRecvBytes = counter.recvBytes - recvBytes
       val recvBytesPerSec = diffRecvBytes / diffSec
       val diffSendBytes = counter.sendBytes - sendBytes
       val sendBytesPerSec = diffSendBytes / diffSec
-      return "Recv: %.2f/s, Send: %.2f/s".format(recvBytesPerSec, sendBytesPerSec)
+      val recvRate = formatRate(recvBytesPerSec)
+      val sendRate = formatRate(sendBytesPerSec)
+      return "Recv: %5.1f %3s/s, Send: %5.1f %3s/s".format(recvRate._1, recvRate._2, sendRate._1, sendRate._2)
     }
   }
 
