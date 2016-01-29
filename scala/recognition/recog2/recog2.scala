@@ -1,4 +1,5 @@
 import scala.io.Source
+import midsummer._
 
 object Ctx {
   var showDotResult = false
@@ -8,7 +9,7 @@ class Classifier(numClass: Int, numFeature: Int) {
 
   class ClsfFunc(klass: Int, numFeature: Int) {
     val rho = 0.1
-    var w = (0 to numFeature) map { d => 0.0 }
+    var w = Vect(numFeature + 1)
     println(s"[${this.getClass.getName}] class: $klass, $w, rho: $rho")
 
     def hook(v: Double): Double = {
@@ -17,21 +18,10 @@ class Classifier(numClass: Int, numFeature: Int) {
       return v
     }
 
-    def delta_weight(x: Seq[Double]) = {
-      x map { _ * rho }
-    }
+    def inc_weight(x: Vect) = { w += x * rho }
+    def dec_weight(x: Vect) = { w -= x * rho }
 
-    def inc_weight(x: Seq[Double]) = {
-      w = w zip delta_weight(x) map { v => v._1 + v._2 }
-    }
-
-    def dec_weight(x: Seq[Double]) = {
-      w = w zip delta_weight(x) map { v => v._1 - v._2 }
-    }
-
-    def apply(x: Seq[Double]): Double = {
-      (w zip x map { z => z._1 * z._2 } map hook).sum
-    }
+    def apply(x: Vect): Double = w * x
 
     def showWeights() {
       val s = w map { a => f"$a%.3f" } reduce { (a, b) => s"$a, $b" }
@@ -45,7 +35,7 @@ class Classifier(numClass: Int, numFeature: Int) {
     v;
   }
 
-  def learn(data: Seq[(Seq[Double], Int)]) = {
+  def learn(data: Seq[(Vect, Int)]) = {
     showWeights()
     var numRepeat = 0
     while (tryLearn(data) >= 1) {
@@ -54,9 +44,9 @@ class Classifier(numClass: Int, numFeature: Int) {
     println(s"====> numRepeat: $numRepeat")
   }
 
-  private def tryLearn(data: Seq[(Seq[Double], Int)]): Int = {
+  private def tryLearn(data: Seq[(Vect, Int)]): Int = {
     val numFixed = (data map { d =>
-      val x = 1.0 +: d._1
+      val x = Vect(1.0) ++ d._1
       val trueClass = d._2
       println(s">>> data: $d")
       fixWeightIfNeeded(trueClass, x)
@@ -65,7 +55,7 @@ class Classifier(numClass: Int, numFeature: Int) {
     numFixed
   }
 
-  def fixWeightIfNeeded(trueClass: Int, x: Seq[Double]): Int = {
+  def fixWeightIfNeeded(trueClass: Int, x: Vect): Int = {
     val calcClass = apply(x)
     if (calcClass != trueClass)
       fixWeightRecursively(trueClass, calcClass, x)
@@ -76,7 +66,7 @@ class Classifier(numClass: Int, numFeature: Int) {
   protected def toIndex(klass: Int) = { klass - 1 }
   protected def toClass(idx: Int) = { idx + 1 }
 
-  def fixWeightRecursively(trueClass: Int, calcClass: Int, x: Seq[Double]): Int = {
+  def fixWeightRecursively(trueClass: Int, calcClass: Int, x: Vect): Int = {
       cfuncs(toIndex(trueClass)).inc_weight(x);
       cfuncs(toIndex(calcClass)).dec_weight(x);
       val numFixed = fixWeightIfNeeded(trueClass, x)
@@ -90,7 +80,7 @@ class Classifier(numClass: Int, numFeature: Int) {
     println("===")
   }
 
-  def apply(x: Seq[Double]): Int = {
+  def apply(x: Vect): Int = {
     val idx = ((cfuncs map { _(x) }).zipWithIndex map hook).max._2
     toClass(idx)
   }
@@ -103,19 +93,19 @@ object Recog2 {
     println(" learning_file [target_file]")
   }
 
-  private def parseLearningDataLine(line: String): (Seq[Double], Int) = {
+  private def parseLearningDataLine(line: String): (Vect, Int) = {
     val elems = line.split(" +")
     val klass = elems.head.toInt
-    val featureVect = elems.tail.map { _.toDouble }
+    val featureVect = Vect(elems.tail.map(_.toDouble))
     (featureVect, klass)
   }
 
-  private def parseDataLine(line: String): Seq[Double] = {
-    line.split(" +") map { _.toDouble }
+  private def parseDataLine(line: String): Vect = {
+    Vect(line.split(" +") map(_.toDouble))
   }
 
   private
-  def getLearningDataOutline(data: Seq[(Seq[Double], Int)]): (Int, Int) = {
+  def getLearningDataOutline(data: Seq[(Vect, Int)]): (Int, Int) = {
     val numClass = data.map { _._2 }.toSet.size
     val numFeature = data.head._1.size
     data.tail.map { _._1 } foreach { s => assert(s.size == numFeature) }
@@ -153,7 +143,7 @@ object Recog2 {
       println(s"file: ${targetFile}")
       val lines = Source.fromFile(targetFile).getLines.toSeq
       lines filter isValidDataLine map parseDataLine map {
-        x => (x, classifier(1.0 +: x))
+        x => (x, classifier(Vect(1.0) ++ x))
       } foreach {
         t => println(s"*** input: ${t._1},\tclass: ${t._2}")
       }
