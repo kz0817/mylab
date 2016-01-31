@@ -122,7 +122,7 @@ class VectSpec extends FlatSpec with Matchers {
 
   it should "have toString method" in {
     val vec = Vect(253.0, 3.5e3, -8.123)
-    vec.toString should be ("(2.530000e+02, 3.500000e+03, -8.123000e+00)")
+    vec.toString should be ("(+2.530000e+02, +3.500000e+03, -8.123000e+00)")
   }
 
   it should "have ++ operator" in {

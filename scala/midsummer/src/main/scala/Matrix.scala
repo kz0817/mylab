@@ -104,7 +104,7 @@ class Vect(n: Int) extends Matrix(1, n) {
   def map (f:(Double) => Any) = iter { (i: Int, j: Int) => f(apply(i, j)) }
   def toArray: Array[Double] = matrix(0)
   override def toString = {
-    val s = map { v => f"${v}%e" } map {
+    val s = map { v => f"${v}%+e" } map {
               a => a.asInstanceOf[String] } reduce { (a, b) => s"$a, $b" }
     "(" + s + ")"
   }
