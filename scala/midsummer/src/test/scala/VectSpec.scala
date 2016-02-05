@@ -30,6 +30,13 @@ class VectSpec extends FlatSpec with Matchers {
     vec(2) should be (8)
   }
 
+  it should "be created with Matrix" in  {
+    val vec = Vect(Matrix(2, 1, 1.0, -2))
+    vec should have size 2
+    vec(0) should be (1.0)
+    vec(1) should be (-2)
+  }
+
   it should "have the factory pattern from Int" in {
     val vec = Vect(2)
     vec should have size 2
@@ -52,6 +59,13 @@ class VectSpec extends FlatSpec with Matchers {
   }
 
   it should "have the factory pattern from Vect" in {
+    val vec = Vect(new Vect(1, -5))
+    vec should have size 2
+    vec(0) should be (1)
+    vec(1) should be (-5)
+  }
+
+  it should "have isSquare()" in {
     val vec = Vect(new Vect(1, -5))
     vec should have size 2
     vec(0) should be (1)
