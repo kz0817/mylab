@@ -164,23 +164,19 @@ int main(void)
 	                             0, NULL, NULL);
 	checkResult(ret, "clEnqueueNDRangeKernel");
 
+	ret = clFinish(cmdq);
+	checkResult(ret, "clFinish");
+
 	ret = clEnqueueReadBuffer(cmdq, pcx.outDev(), CL_TRUE, 0,
 	                          pcx.num * sizeof(float),
 	                          pcx.outMem(), 0, NULL, NULL);
 	checkResult(ret, "clEnqueueReadBuffer");
-
-	ret = clFlush(cmdq);
-	checkResult(ret, "clFlush");
-
-	ret = clFinish(cmdq);
-	checkResult(ret, "clFinish");
-
 	pcx.showResult();
 
-	ret = clReleaseKernel(krnl);
-	ret = clReleaseProgram(prog);
-	ret = clReleaseCommandQueue(cmdq);
-	ret = clReleaseContext(ctx);
+	checkResult(clReleaseKernel(krnl),       "clRleaseKernel");
+	checkResult(clReleaseProgram(prog),      "clRelaseProgram");
+	checkResult(clReleaseCommandQueue(cmdq), "clReleaseCommandQueue");
+	checkResult(clReleaseContext(ctx),       "clRelaseContext");
 
 	return EXIT_SUCCESS;
 }
