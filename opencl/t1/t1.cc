@@ -123,8 +123,13 @@ int main(void)
 	                                 &device_id, NULL, NULL, &ret);
 	checkResult(ret, "clCreateContext");
 
+#ifdef CL_EXT_PREFIX__VERSION_2_0_DEPRECATED
 	cl_command_queue cmdq = clCreateCommandQueueWithProperties(
 	                          ctx, device_id, NULL, &ret);
+#else
+	cl_command_queue cmdq = clCreateCommandQueue(
+	                          ctx, device_id, 0, &ret);
+#endif
 	checkResult(ret, "clCreateCommandQueueWithProperties");
 
 	const char *src = pcx.krnl_add_src.c_str();
