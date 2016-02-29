@@ -9,9 +9,12 @@
 #include <functional>
 using namespace std;
 
-static void checkResult(const cl_int code, const string &method)
+static void checkResult(const cl_int code, const string &method,
+                        function<bool()> hook = []{ return false; } )
 {
 	if (code == CL_SUCCESS)
+		return;
+	if (hook())
 		return;
 	fprintf(stderr, "Failed: %s, code: %d\n", method.c_str(), code);
 	throw new exception();
@@ -138,7 +141,18 @@ int main(void)
 	checkResult(ret, "clCreateProgramWithSource");
 
 	ret = clBuildProgram(prog, 1, &device_id, NULL, NULL, NULL);
-	checkResult(ret, "clBuildProgram");
+	auto showBuildInfo = [&] {
+		const size_t bufsize = 0x1000;
+		char buf[bufsize];
+		size_t actual_size;
+		cl_int code = clGetProgramBuildInfo(
+		  prog, device_id, CL_PROGRAM_BUILD_LOG,
+		  bufsize, buf, &actual_size);
+		fprintf(stderr, "[size:%ld] %s", actual_size, buf);
+		checkResult(code, "clGetProgramBuildInfo");
+		return false;
+	};
+	checkResult(ret, "clBuildProgram", showBuildInfo);
 
 	cl_kernel krnl = clCreateKernel(prog, "add", &ret);
 	checkResult(ret, "clCreateKernel");
