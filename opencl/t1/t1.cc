@@ -22,7 +22,7 @@ static void checkResult(const cl_int code, const string &method,
 
 struct ProgramContext {
 	static constexpr size_t NUM_ELEM = 3;
-	const size_t   num;
+	const uint     num;
 	string         krnl_add_src;
 	cl_platform_id platform_id;
 	cl_uint        num_platforms;
@@ -171,7 +171,7 @@ int main(void)
 	});
 
 	int idx = 0;
-	clSetKernelArg(krnl, idx++, sizeof(size_t), &pcx.num);
+	clSetKernelArg(krnl, idx++, sizeof(pcx.num), &pcx.num);
 	pcx.devForeach([&](cl_mem &dev) {
 		clSetKernelArg(krnl, idx++, sizeof(cl_mem), &dev);
 	});

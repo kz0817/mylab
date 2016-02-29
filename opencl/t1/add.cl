@@ -1,4 +1,4 @@
-__kernel void add(size_t n, __global float *a, __global float *b,
+__kernel void add(uint n, __global float *a, __global float *b,
 		  __global float *s) {
 	int id = get_global_id(0);
 	if (id < n) {
