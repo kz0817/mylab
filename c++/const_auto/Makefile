@@ -1,2 +1,2 @@
 CXXFLAGS=-std=c++11
-prog:
+all: prog iter
