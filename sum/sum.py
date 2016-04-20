@@ -19,9 +19,19 @@ def prepare_data(concurrency):
 
 
 def parallel_sum(concurrency, data):
+
+    def get_loop_times():
+        return int(math.ceil(math.log(concurrency) / math.log(2)))
+
+    def get_loop_times_without_log():
+        n = 1
+        while (concurrency >> n) > 0:
+            n += 1
+        return n
+
     sum_arr = map(lambda n: n, data)
     work_items = [WorkItem(i, data, sum_arr) for i in range(concurrency)]
-    n_loop = int(math.ceil(math.log(concurrency) / math.log(2)))
+    n_loop = get_loop_times_without_log()
     for i in range(n_loop):
         for work_item in work_items:
             work_item.step(i)
