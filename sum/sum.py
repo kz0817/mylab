@@ -26,7 +26,16 @@ def parallel_sum(concurrency, data):
         for work_item in work_items:
             work_item.step(i)
 
-    return sum_arr[concurrency-1]
+    return sum_arr
+
+
+def simple_sum(concurrency, data):
+    sum_arr = []
+    for i in range(len(data)):
+        sum_arr.append(data[i])
+        if i > 0:
+            sum_arr[i] += sum_arr[i-1]
+    return sum_arr
 
 
 def main():
@@ -34,10 +43,11 @@ def main():
     parser.add_argument('-c', '--concurrency', type=int, default=10)
     args = parser.parse_args()
     data = prepare_data(args.concurrency)
-    sum_simple = reduce(lambda a, b: a + b, data)
-    sum_quick = parallel_sum(args.concurrency, data)
-    print "Simple: %d, Quick: %d" % (sum_simple, sum_quick)
-    assert sum_simple == sum_quick
+    sum_arr_simple = simple_sum(args.concurrency, data)
+    sum_arr_quick = parallel_sum(args.concurrency, data)
+    print "Simple: %s" % sum_arr_simple
+    print "Quick : %s" % sum_arr_quick
+    assert sum_arr_simple == sum_arr_quick
 
 
 if __name__ == "__main__":
