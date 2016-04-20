@@ -30,11 +30,9 @@ def parallel_sum(concurrency, data):
 
 
 def simple_sum(concurrency, data):
-    sum_arr = []
-    for i in range(len(data)):
-        sum_arr.append(data[i])
-        if i > 0:
-            sum_arr[i] += sum_arr[i-1]
+    sum_arr = data[:]
+    for i in range(1, len(data)):
+        sum_arr[i] += sum_arr[i-1]
     return sum_arr
 
 
