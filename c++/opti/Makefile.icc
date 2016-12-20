@@ -1,0 +1,17 @@
+PROGRAMS = opti-icc opti-icc-fast opti-icc-par
+CXX=/opt/intel/bin/icc
+LD=g++
+all: $(PROGRAMS)
+
+opti-icc: opti.cc
+	$(CXX) -o $@ $<
+
+opti-icc-fast: opti.cc
+	$(CXX) -fast -o $@ $<
+
+opti-icc-par: opti.cc
+	$(CXX) -O3 -xHOST -parallel -o $@ $<
+
+.PHONY: clean
+clean:
+	rm -f $(PROGRAMS)
