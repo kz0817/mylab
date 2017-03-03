@@ -1,5 +1,6 @@
 <html>
 <head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <!-- styles needed by jScrollPane -->
 <link type="text/css" href="https://cdn.rawgit.com/vitch/jScrollPane/master/style/jquery.jscrollpane.css" rel="stylesheet" media="all" />
@@ -48,6 +49,18 @@ pre.wrap {
 
 pre.scl-auto {
   overflow: auto;
+}
+
+.scl-always:focus {
+  /* Workaround to hide focus box */
+  outline: none;
+}
+
+/* Only Chrome */
+_::content, _:future, .scl-always:focus {
+  /* Workaround to hide focus box */
+  outline: solid;
+  outline-color: white;
 }
 
 .jspHorizontalBar {
