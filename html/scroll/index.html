@@ -1,0 +1,112 @@
+<html>
+<head>
+
+<!-- styles needed by jScrollPane -->
+<link type="text/css" href="https://cdn.rawgit.com/vitch/jScrollPane/master/style/jquery.jscrollpane.css" rel="stylesheet" media="all" />
+
+<!-- latest jQuery direct from google's CDN -->
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js">
+</script>
+
+<!-- the mousewheel plugin - optional to provide mousewheel support -->
+<script type="text/javascript" src="https://cdn.rawgit.com/vitch/jScrollPane/master/script/jquery.mousewheel.js"></script>
+
+<!-- the jScrollPane script -->
+<script type="text/javascript" src="https://cdn.rawgit.com/vitch/jScrollPane/master/script/jquery.jscrollpane.min.js"></script>
+
+<script type="text/javascript">
+$(window).load(function() {
+  console.log("HEEEEEEELO");
+  $(".scl-always").jScrollPane();
+});
+</script>
+
+<style>
+<!--
+
+.narrow {
+  width: 200px;
+  color: white;
+  background-color: black;
+}
+
+pre {
+  padding: 10px;
+}
+
+pre.wrap {
+  white-space: -moz-pre-wrap; /* Mozilla */
+  white-space: -pre-wrap;     /* Opera 4-6 */
+  white-space: -o-pre-wrap;   /* Opera 7 */
+  white-space: pre-wrap;      /* CSS3 */
+  word-wrap: break-word;      /* IE 5.5+ */
+}
+
+pre.scl-auto {
+  overflow: auto;
+}
+
+.jspHorizontalBar {
+  position:absolute;
+  bottom:0;
+  left:0;
+  width:100%;
+  height:10px;
+}
+
+.jspDrag {
+  background: gray;
+}
+
+.jspTrack
+{
+  background: #e0e0e0;
+}
+
+-->
+</style>
+</head>
+<body>
+
+自動
+<pre class="scl-auto narrow">
+#include "rte_ring.h"
+
+TAILQ_HEAD(rte_ring_list, rte_tailq_entry);
+
+static struct rte_tailq_elem rte_ring_tailq = {
+        .name = RTE_TAILQ_RING_NAME,
+};
+EAL_REGISTER_TAILQ(rte_ring_tailq)
+</pre>
+<br>
+
+常にバー表示（の一実装）
+<br><br>
+<div class="scl-always narrow">
+<pre>
+#include "rte_ring.h"
+
+TAILQ_HEAD(rte_ring_list, rte_tailq_entry);
+
+static struct rte_tailq_elem rte_ring_tailq = {
+        .name = RTE_TAILQ_RING_NAME,
+};
+</pre>
+</div>
+<br>
+
+折り返し
+<pre class="wrap narrow">
+#include "rte_ring.h"
+
+TAILQ_HEAD(rte_ring_list, rte_tailq_entry);
+
+static struct rte_tailq_elem rte_ring_tailq = {
+        .name = RTE_TAILQ_RING_NAME,
+};
+EAL_REGISTER_TAILQ(rte_ring_tailq)
+</pre>
+
+</body>
+</html>
