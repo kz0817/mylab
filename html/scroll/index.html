@@ -24,6 +24,7 @@ $(window).load(function() {
   // Chrome needs the explicit width style for the element
   $(".scl-always").find("pre").each(function(idx, elem) {
      $(elem).width(elem.scrollWidth);
+     $(elem).height(elem.scrollHeight);
   });
 });
 </script>
