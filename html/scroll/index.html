@@ -20,7 +20,7 @@ $(window).load(function() {
 
   // Workaround to avoid residual image on Chrome
   $('.jspDrag').mousedown(function(){
-    $('#area1').focus();
+    $(this).closest('.scl-always').focus();
   });
 });
 </script>
@@ -87,7 +87,7 @@ EAL_REGISTER_TAILQ(rte_ring_tailq)
 
 常にバー表示（の一実装）
 <br><br>
-<div class="scl-always narrow" id="area1">
+<div class="scl-always narrow">
 <pre>
 #include "rte_ring.h"
 
