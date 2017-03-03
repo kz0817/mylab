@@ -20,7 +20,11 @@ $(window).load(function() {
   $(".scl-always").jScrollPane({
     "hideFocus": true,
   });
-  $("#pre1").width(pre1.scrollWidth);
+
+  // Chrome needs the explicit width style for the element
+  $(".scl-always").find("pre").each(function(idx, elem) {
+     $(elem).width(elem.scrollWidth);
+  });
 });
 </script>
 
@@ -73,7 +77,7 @@ pre.scl-auto {
 常にバー表示（の一実装）
 <br><br>
 <div class="scl-always narrow">
-<pre id="pre1">
+<pre>
 #include "rte_ring.h"
 
 TAILQ_HEAD(rte_ring_list, rte_tailq_entry);
