@@ -71,20 +71,6 @@ pre.scl-auto {
 </style>
 </head>
 <body>
-
-デフォルト(表示状態は環境に依存）
-<pre class="scl-auto narrow">
-#include "rte_ring.h"
-
-TAILQ_HEAD(rte_ring_list, rte_tailq_entry);
-
-static struct rte_tailq_elem rte_ring_tailq = {
-        .name = RTE_TAILQ_RING_NAME,
-};
-EAL_REGISTER_TAILQ(rte_ring_tailq)
-</pre>
-<br>
-
 常にバー表示（の一実装）
 <br><br>
 <div class="scl-always narrow">
@@ -98,6 +84,19 @@ static struct rte_tailq_elem rte_ring_tailq = {
 };
 </pre>
 </div>
+<br>
+
+デフォルト(表示状態は環境に依存）
+<pre class="scl-auto narrow">
+#include "rte_ring.h"
+
+TAILQ_HEAD(rte_ring_list, rte_tailq_entry);
+
+static struct rte_tailq_elem rte_ring_tailq = {
+        .name = RTE_TAILQ_RING_NAME,
+};
+EAL_REGISTER_TAILQ(rte_ring_tailq)
+</pre>
 <br>
 
 折り返し
