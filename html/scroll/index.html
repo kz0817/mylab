@@ -17,15 +17,10 @@
 
 <script type="text/javascript">
 $(window).load(function() {
-  $(".scl-always").jScrollPane();
-
-  // Workaround to avoid residual image on Chrome
-  $('.jspDrag').mousedown(function(){
-    $(this).closest('.scl-always').focus();
+  $(".scl-always").jScrollPane({
+    "hideFocus": true,
   });
-  $('.scl-always').mouseenter(function(){
-    $(this).focus();
-  });
+  $("#pre1").width(pre1.scrollWidth);
 });
 </script>
 
@@ -54,18 +49,6 @@ pre.scl-auto {
   overflow: auto;
 }
 
-.scl-always:focus {
-  /* Workaround to hide focus box */
-  outline: none;
-}
-
-/* Only Chrome */
-_::content, _:future, .scl-always:focus {
-  /* Workaround to hide focus box */
-  outline: solid;
-  outline-color: white;
-}
-
 .jspHorizontalBar {
   position:absolute;
   bottom:0;
@@ -90,7 +73,7 @@ _::content, _:future, .scl-always:focus {
 常にバー表示（の一実装）
 <br><br>
 <div class="scl-always narrow">
-<pre>
+<pre id="pre1">
 #include "rte_ring.h"
 
 TAILQ_HEAD(rte_ring_list, rte_tailq_entry);
