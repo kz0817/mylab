@@ -17,6 +17,11 @@
 <script type="text/javascript">
 $(window).load(function() {
   $(".scl-always").jScrollPane();
+
+  // Workaround to avoid residual image on Chrome
+  $('.jspDrag').mousedown(function(){
+    $('#area1').focus();
+  });
 });
 </script>
 
@@ -82,7 +87,7 @@ EAL_REGISTER_TAILQ(rte_ring_tailq)
 
 常にバー表示（の一実装）
 <br><br>
-<div class="scl-always narrow">
+<div class="scl-always narrow" id="area1">
 <pre>
 #include "rte_ring.h"
 
