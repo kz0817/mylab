@@ -1,2 +1,2 @@
 CXXFLAGS=-g3 -O3
-chrono-many:
+all: chrono-many chrono-size
