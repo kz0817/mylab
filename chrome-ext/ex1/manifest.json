@@ -1,0 +1,15 @@
+{
+  "manifest_version": 2,
+  "name": "Example 1",
+  "description": "This is an example of Chrome extension",
+  "version": "0.1",
+  "browser_action": {
+  },
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "permissions": [
+    "http://*/*",
+    "https://*/*"
+  ]
+}

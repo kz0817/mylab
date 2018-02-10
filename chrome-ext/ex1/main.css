@@ -1,0 +1,17 @@
+
+#url-box {
+  width: 50rem;
+}
+
+.main-button {
+  width:  8rem;
+  height: 3rem;
+  color: white;
+  background: #0070ff;
+  border: none;
+  outline: none;
+  margin: 0.5rem 0rem;
+}
+.main-button:active {
+  background: #00b0ff;
+}
