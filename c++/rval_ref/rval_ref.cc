@@ -97,4 +97,19 @@ int main(void)
 	x4 = func_const();
 	printf("\n");
 
+	printf("[x5l] ==========\n");
+	const X& x5l = func1();
+	printf("\n");
+
+	printf("[x5lc] ==========\n");
+	const X& x5lc = func_const();
+	printf("\n");
+
+	printf("[x5r] ==========\n");
+	X&& x5r = func1();
+	printf("\n");
+
+	printf("[x5rc] ==========\n");
+	const X&& x5rc = func_const();
+	printf("\n");
 }
