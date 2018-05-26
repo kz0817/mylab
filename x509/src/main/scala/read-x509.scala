@@ -53,6 +53,8 @@ object ReadX509 {
     val headerLength = 1 /* tag length */ +  lenDesc.lengthPartLength
     //println(f"  - Tag: val: class: 0x${tag.klass}%02x, struct: ${tag.structFlag}%5b, number: 0x${tag.number}%02x, valueLength: $valueLength")
 
+    // TODO: manage remaining unread length
+
     def readValueLength(it: Iterator[Byte]): LengthDescr = {
       val b = it.next
       val isLong: Boolean = (b & 0x80) != 0
@@ -70,14 +72,20 @@ object ReadX509 {
       new Return[T](ret.value, headerLength + ret.readLength)
     }
 
-    def read[T](f: (Module, Seq[Byte]) => T): Return[T] = {
-      val value = for (i <- 1 to valueLength) yield it.next
+    def read[T](
+        f: (Module, Seq[Byte]) => T, length: Int = valueLength): Return[T] = {
+      val value = for (i <- 1 to length) yield it.next
       val ret = f(this, value)
       new Return[T](ret, headerLength + valueLength)
     }
 
     def readAsHexDump(): Return[String] = {
-      read { (h, v) => s"${toHexDump(v)}" }
+      val unusedBits = tag.number match {
+        case TAG_BIT_STR => it.next
+        case _ => 0
+      }
+      assert(unusedBits == 0, "Not implemented")
+      read({ (h, v) => s"${toHexDump(v)}" }, valueLength - 1)
     }
   }
 
