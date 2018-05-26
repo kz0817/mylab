@@ -113,7 +113,7 @@ Param parseArg(int argc, char *argv[])
 	using ParserContext = ArgParser<Param>::Context;
 	ArgParser<Param> parser(argc, argv);
 
-	parser.add({"-ul", "--upper-limit"},
+	parser.add({"-u", "--upper-limit"},
 	  [](const string &arg, ParserContext &ctx) {
 		ctx.nextParser = [](const string &arg, ParserContext &ctx) {
 			ctx.priv.upperLimit = atol(arg.c_str());
