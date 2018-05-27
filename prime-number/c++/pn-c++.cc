@@ -18,7 +18,7 @@ private:
 
 	vector<string> initArgs(int argc, char *argv[]) {
 		vector<string> v;
-		for (int i = 0; i < argc; i++)
+		for (int i = 1; i < argc; i++)
 			v.push_back(argv[i]);
 		return v;
 	}
