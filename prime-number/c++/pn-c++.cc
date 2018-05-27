@@ -96,14 +96,18 @@ public:
 	void show(void) const {
 		for (const auto pn: primeNumbers) { cout << pn << endl; }
 	}
+
+	void reserve(const long n) { primeNumbers.reserve(n); }
 };
 
 struct Param {
 	long upperLimit;
+	long reserve;
 	bool show;
 
 	Param()
 	: upperLimit(0),
+	  reserve(0),
 	  show(false)
 	{}
 };
@@ -120,6 +124,13 @@ Param parseArg(int argc, char *argv[])
 		};
 	});
 
+	parser.add({"-r", "--reserve"},
+	  [](const string &arg, ParserContext &ctx) {
+		ctx.nextParser = [](const string &arg, ParserContext &ctx) {
+			ctx.priv.reserve = atol(arg.c_str());
+		};
+	});
+
 	parser.add({"-s", "--show"},
 	  [](const string &arg, ParserContext &ctx) {
 		 ctx.priv.show = true;
@@ -129,10 +140,16 @@ Param parseArg(int argc, char *argv[])
 
 int main(int argc, char *argv[])
 {
+	PrimeNumber pn;
+
 	const auto param = parseArg(argc, argv);
 	cout << "Upper limit: " << param.upperLimit << endl;
 
-	PrimeNumber pn;
+	if (param.reserve > 0) {
+		cout << "Reserve: " << param.reserve << endl;
+		pn.reserve(param.reserve);
+	}
+
 	pn.calc(param.upperLimit);
 	cout << "Count: " << pn.count() << endl;
 	if (param.show)
