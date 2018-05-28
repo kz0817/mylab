@@ -7,7 +7,7 @@ def calc(args):
 
     def is_prime_number(n):
         for pn in prime_numbers:
-            if pn > n/2:
+            if pn * pn > n:
                 break
             if n % pn == 0:
                 return False

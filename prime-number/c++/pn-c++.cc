@@ -76,7 +76,7 @@ class PrimeNumber {
 	bool isPrimeNumber(const long n)
 	{
 		for (const auto &primeNum: primeNumbers) {
-			if (primeNum > n/2)
+			if (primeNum * primeNum > n)
 				return true;
 			if (n % primeNum == 0)
 				return false;

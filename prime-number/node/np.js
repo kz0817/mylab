@@ -5,7 +5,7 @@ const calc = (args) => {
     const isPrimeNumber = (n) => {
         for (let i = 0; i < primeNumbers.length; i++) {
             const pn = primeNumbers[i]
-            if (pn > n/2)
+            if (pn * pn > n)
                 return true
             if (n % pn  == 0)
                 return false
