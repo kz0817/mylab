@@ -70,10 +70,11 @@ public:
 	}
 };
 
+template <typename T>
 class PrimeNumber {
-	vector<long> primeNumbers;
+	vector<T> primeNumbers;
 
-	bool isPrimeNumber(const long n)
+	bool isPrimeNumber(const T n)
 	{
 		for (const auto &primeNum: primeNumbers) {
 			if (primeNum * primeNum > n)
@@ -85,19 +86,19 @@ class PrimeNumber {
 	}
 
 public:
-	void calc(const long upperLimit) {
+	void calc(const T upperLimit) {
 		for (auto n = 2; n <= upperLimit; n++) {
 			if (isPrimeNumber(n))
 				primeNumbers.push_back(n);
 		}
 	}
 
-	long count(void) const { return primeNumbers.size(); }
+	T count(void) const { return primeNumbers.size(); }
 	void show(void) const {
 		for (const auto pn: primeNumbers) { cout << pn << endl; }
 	}
 
-	void reserve(const long n) { primeNumbers.reserve(n); }
+	void reserve(const T n) { primeNumbers.reserve(n); }
 };
 
 struct Param {
@@ -124,6 +125,13 @@ Param parseArg(int argc, char *argv[])
 		};
 	});
 
+	parser.add({"-u", "--upper-limit"},
+	  [](const string &arg, ParserContext &ctx) {
+		ctx.nextParser = [](const string &arg, ParserContext &ctx) {
+			ctx.priv.upperLimit = atol(arg.c_str());
+		};
+	});
+
 	parser.add({"-r", "--reserve"},
 	  [](const string &arg, ParserContext &ctx) {
 		ctx.nextParser = [](const string &arg, ParserContext &ctx) {
@@ -140,7 +148,11 @@ Param parseArg(int argc, char *argv[])
 
 int main(int argc, char *argv[])
 {
-	PrimeNumber pn;
+#ifdef TYPE_LONG
+	PrimeNumber<long> pn;
+#else
+	PrimeNumber<int> pn;
+#endif
 
 	const auto param = parseArg(argc, argv);
 	cout << "Upper limit: " << param.upperLimit << endl;
