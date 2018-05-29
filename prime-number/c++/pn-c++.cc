@@ -101,6 +101,82 @@ public:
 	void reserve(const T n) { primeNumbers.reserve(n); }
 };
 
+template <typename T>
+class PrimeNumberOdd {
+	vector<T> primeNumbers;
+
+	bool isPrimeNumber(const T n)
+	{
+		for (const auto &primeNum: primeNumbers) {
+			if (primeNum * primeNum > n)
+				return true;
+			if (n % primeNum == 0)
+				return false;
+		}
+		return true;
+	}
+
+public:
+	PrimeNumberOdd()
+	{
+		primeNumbers.push_back(2);
+	}
+
+	void calc(const T upperLimit) {
+		for (auto n = 3; n <= upperLimit; n += 2) {
+			if (isPrimeNumber(n))
+				primeNumbers.push_back(n);
+		}
+	}
+
+	T count(void) const { return primeNumbers.size(); }
+	void show(void) const {
+		for (const auto pn: primeNumbers) { cout << pn << endl; }
+	}
+
+	void reserve(const T n) { primeNumbers.reserve(n); }
+};
+
+template<typename T>
+class PrimeNumberOddSmart {
+	vector<T> primeNumbers;
+	size_t lastIdx;
+
+	bool isPrimeNumber(const T n)
+	{
+		T pn;
+		for (size_t i = 0; i <= lastIdx; i++) {
+			pn = primeNumbers[i];
+			if (n % pn == 0)
+				return false;
+		}
+		if (n > pn * pn)
+			lastIdx++;
+		return true;
+	}
+
+public:
+	PrimeNumberOddSmart()
+	: lastIdx(0)
+	{
+		primeNumbers.push_back(2);
+	}
+
+	void calc(const T upperLimit) {
+		for (auto n = 3; n <= upperLimit; n+= 2) {
+			if (isPrimeNumber(n))
+				primeNumbers.push_back(n);
+		}
+	}
+
+	T count(void) const { return primeNumbers.size(); }
+	void show(void) const {
+		for (const auto pn: primeNumbers) { cout << pn << endl; }
+	}
+
+	void reserve(const T n) { primeNumbers.reserve(n); }
+};
+
 struct Param {
 	long upperLimit;
 	long reserve;
@@ -148,13 +224,24 @@ Param parseArg(int argc, char *argv[])
 
 int main(int argc, char *argv[])
 {
+	const auto param = parseArg(argc, argv);
+
 #ifdef TYPE_LONG
 	PrimeNumber<long> pn;
 #else
+
+#ifdef STD
 	PrimeNumber<int> pn;
 #endif
+#ifdef ODD
+	PrimeNumberOdd<int> pn;
+#endif
+#ifdef ODD_SMART
+	PrimeNumberOddSmart<int> pn;
+#endif
 
-	const auto param = parseArg(argc, argv);
+#endif
+
 	cout << "Upper limit: " << param.upperLimit << endl;
 
 	if (param.reserve > 0) {
