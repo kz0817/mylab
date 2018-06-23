@@ -1,0 +1,12 @@
+{
+  "name": "node-enc",
+  "version": "1.0.0",
+  "description": "Encryption and description example",
+  "main": "enc.js",
+  "scripts": {
+    "start": "node enc.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
