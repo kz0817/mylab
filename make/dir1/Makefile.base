@@ -1,0 +1,1 @@
+BASEDIR = $(dir $(lastword $(MAKEFILE_LIST)))
