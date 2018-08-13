@@ -1,0 +1,3 @@
+# How to run
+
+    nginx -p $(pwd) -c nginx.conf
