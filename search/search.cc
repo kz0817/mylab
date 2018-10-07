@@ -85,7 +85,7 @@ static bool search(const Args &args)
             break;
         buf.push(ch);
         if (buf == pattern) {
-            cout << "Match: " << setw(16) << right << offset << "  "
+            cout << "Match: " << dec << setw(16) << right << offset << "  "
                  << hex << setw(12) << right << offset << endl;
         }
         offset++;

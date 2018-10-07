@@ -17,7 +17,14 @@ class TestSearch(unittest.TestCase):
 
         match_pairs = map(lambda l: (self.__re_target.match(l), l), lines)
         match_lines = filter(lambda m: m[0], match_pairs)
-        return [int(line[match.end():]) for match, line in match_lines]
+        pos_arr = [line[match.end():].split() for match, line in match_lines]
+
+        ret = []
+        for dec, hexa in pos_arr:
+            self.assertEqual(int(dec), int(hexa,16))
+            ret.append(int(dec))
+        return ret
+
 
     def test_top(self):
         matches = self.__run('abc')
