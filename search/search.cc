@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <string>
 #include <cstring>
@@ -83,8 +84,10 @@ static bool search(const Args &args)
         if (ifs.eof())
             break;
         buf.push(ch);
-        if (buf == pattern)
-            cout << "Match: " << offset << endl;
+        if (buf == pattern) {
+            cout << "Match: " << setw(16) << right << offset << "  "
+                 << hex << setw(12) << right << offset << endl;
+        }
         offset++;
     }
 
