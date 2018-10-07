@@ -15,14 +15,16 @@ class TestSearch(unittest.TestCase):
         self.assertEqual(ret.returncode, 0)
         lines = ret.stdout.decode('utf-8').split('\n')
 
-        match_pairs = map(lambda l: (self.__re_target.match(l), l), lines)
-        match_lines = filter(lambda m: m[0], match_pairs)
-        pos_arr = [line[match.end():].split() for match, line in match_lines]
-
         ret = []
-        for dec, hexa in pos_arr:
-            self.assertEqual(int(dec), int(hexa,16))
-            ret.append(int(dec))
+        for line in lines:
+            match = self.__re_target.match(line)
+            if not match:
+                continue
+            dec_str, hex_str = line[match.end():].split()
+            dec_val = int(dec_str)
+            hex_val = int(hex_str, 16)
+            self.assertEqual(dec_val, hex_val)
+            ret.append(dec_val)
         return ret
 
 
