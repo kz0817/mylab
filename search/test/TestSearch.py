@@ -8,14 +8,7 @@ class TestSearch(unittest.TestCase):
     def setUp(self):
         self.__re_target = re.compile(r'^Match: ')
 
-    def __run(self, pattern):
-        material_file = 'material1.txt'
-        ret = subprocess.run(['../search', material_file, pattern],
-                             stdout=subprocess.PIPE)
-        self.assertEqual(ret.returncode, 0)
-        lines = ret.stdout.decode('utf-8').split('\n')
-
-        ret = []
+    def __extract_positions(self, lines):
         for line in lines:
             match = self.__re_target.match(line)
             if not match:
@@ -24,8 +17,15 @@ class TestSearch(unittest.TestCase):
             dec_val = int(dec_str)
             hex_val = int(hex_str, 16)
             self.assertEqual(dec_val, hex_val)
-            ret.append(dec_val)
-        return ret
+            yield dec_val
+
+    def __run(self, pattern):
+        material_file = 'material1.txt'
+        ret = subprocess.run(['../search', material_file, pattern],
+                             stdout=subprocess.PIPE)
+        self.assertEqual(ret.returncode, 0)
+        lines = ret.stdout.decode('utf-8').split('\n')
+        return list(self.__extract_positions(lines))
 
 
     def test_top(self):
