@@ -1,0 +1,3 @@
+# How to start for development (automatic update)
+
+    node_modules/.bin/nodemon node app.js
