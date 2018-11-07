@@ -6,13 +6,23 @@ const app = express()
 app.set('views', './views')
 app.set('view engine', 'pug')
 
-app.get("/", function(req, res, next) {
-    res.render('index')
+app.get('/', function(req, res, next) {
+  res.redirect('/login')
 })
+
+app.get('/login', function(req, res, next) {
+    res.render('login')
+})
+
+app.post('/login', function(req, res, next) {
+  //res.send('OK')
+  res.redirect('/page1')
+})
+
 
 app.use('/page1', page1)
 
 const server = app.listen(3000, function(){
-    console.log("Node.js is listening to PORT:" + server.address().port)
+    console.log('Node.js is listening to PORT:' + server.address().port)
 })
 
