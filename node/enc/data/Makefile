@@ -4,4 +4,4 @@ sample.txt.enc: sample.txt passwd.txt
 .PHONY: show
 
 show: sample.txt.enc
-	openssl enc -d -aes-256-cbc -in $< -out /dev/stdout -pass file:passwd.txt -p
+	openssl enc -d -aes-256-cbc -in $< -out /dev/null -pass file:passwd.txt -p
