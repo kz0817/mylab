@@ -1,2 +1,4 @@
-cuda2: cuda2.cu
+all: cuda2 cuda2a
+
+%: %.cu
 	nvcc $< -o $@
