@@ -7,7 +7,11 @@ app.set('views', './views')
 app.set('view engine', 'pug')
 
 app.get('/', function(req, res, next) {
-  res.redirect('/login')
+  res.render('index')
+})
+
+app.get('/top', function(req, res, next) {
+  res.send('top')
 })
 
 app.get('/login', function(req, res, next) {
@@ -15,10 +19,8 @@ app.get('/login', function(req, res, next) {
 })
 
 app.post('/login', function(req, res, next) {
-  //res.send('OK')
-  res.redirect('/page1')
+  res.redirect('/')
 })
-
 
 app.use('/page1', page1)
 
