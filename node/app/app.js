@@ -10,19 +10,22 @@ app.set('views', './views')
 app.set('view engine', 'pug')
 
 app.use((req, res, next) => {
+  if (req.url == '/login') {
+    next()
+    return
+  }
+  const sessionId = req.cookies.sessionId
+  if (!sessionId)
+    res.redirect('login');
   next()
 });
 
 app.get('/', (req, res, next) => {
-  const sessionId = req.cookies.sessionId
-  if (!sessionId)
-    res.redirect('login');
-  else
-    res.render('index')
+  res.render('index')
 })
 
 app.get('/login', (req, res, next) => {
-    res.render('login')
+  res.render('login')
 })
 
 app.post('/login', (req, res, next) => {
@@ -38,6 +41,6 @@ app.get('/logout', (req, res, next) => {
 app.use('/page1', page1)
 
 const server = app.listen(3000, () => {
-    console.log('Node.js is listening to PORT:' + server.address().port)
+  console.log('Node.js is listening to PORT:' + server.address().port)
 })
 
