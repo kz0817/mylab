@@ -1,0 +1,15 @@
+# Tips for build
+
+ArgParser.h can be downloaded from https://github.com/kz0817/Leaf
+
+
+# Tips for test
+
+You should create test materials as
+
+    make -C test/data
+
+PATH should include the directory where 'md5calc' is.
+E.g.
+
+    PATH=.:$PATH test/TestFunction.py
