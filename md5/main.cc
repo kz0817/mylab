@@ -110,6 +110,14 @@ static void setupArgumentParser(Parser &parser)
         }
     });
 
+    parser.add("-c", [](Args &priv, Parser &parser) {
+        if (!parser.hasNext()) {
+            parser.error("-c needs a size");
+            return;
+        }
+        priv.chunkSize = atoi(parser.getNext());
+    });
+
     parser.add("-v", [](Args &priv, Parser &parser) {
         priv.verbose = true;
     });
@@ -129,11 +137,11 @@ int main(int argc, char *argv[])
     }
     Args &args = parser.getPrivateData();
 
-    if (!args.filename.empty()) {
-        if (args.verbose)
+    if (args.verbose) {
+        cout << "Chunk size: " << args.chunkSize << endl;
+        if (!args.filename.empty())
             cout << "File: " << args.filename << endl;
-    } else {
-        if (args.verbose)
+        else
             cout << "Message: " << args.msg << endl;
     }
 
