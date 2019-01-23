@@ -15,9 +15,9 @@ const func1 = async (name) => {
 }
 
 console.log("start");
-sleep(3, "A").then((res) => { console.log(res) });
+sleep(3, "A").then(res => console.log(res));
 
 console.log("func1");
-func1("B").then((res) => { console.log(res) });
+func1("B").then(res => console.log(res));
 
 console.log("end");
