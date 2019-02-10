@@ -22,11 +22,19 @@ class PrimeNumber {
 }
 
 class ArgParser(args: Array[String]) {
+  var upperLimit = 0;
+  val it = args.toIterator
+  while (it hasNext) {
+    it next match {
+      case "-u" => upperLimit = it.next toInt
+    }
+  }
 }
 
 object Main {
   def main(args: Array[String]) {
+    val parser = new ArgParser(args)
     val pn = new PrimeNumber()
-    pn.calc(100000000)
+    pn.calc(parser.upperLimit)
   }
 }
