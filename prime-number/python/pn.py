@@ -18,10 +18,10 @@ def calc(args):
         if is_prime_number(n):
             prime_numbers.append(n)
 
-    print "Count: %s" % len(prime_numbers)
+    print("Count: %s" % len(prime_numbers))
     if args.show:
         for pn in prime_numbers:
-            print pn
+            print(pn)
 
 
 def start():
@@ -30,7 +30,7 @@ def start():
     parser.add_argument("-s", "--show", action="store_true")
     args = parser.parse_args()
 
-    print "Upper limit: %s" % args.upper_limit
+    print("Upper limit: %s" % args.upper_limit)
     calc(args)
 
 if __name__ == "__main__":

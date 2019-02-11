@@ -1,12 +1,12 @@
 #!/bin/sh
 
-run () {
-  echo ===== up to $2 =====
-  time -p sbt "run -u $1"
-  echo
-}
+. ../run-helper.sh
 
-run 1000 1K
-run 1000000 1M
-run 10000000 10M
-run 100000000 100M
+# CLASSPATH shall be defined in the following file
+classpath_file=./run-class-path.sh
+if [ -f $classpath_file ]; then
+  echo source file $classpath_file
+  . $classpath_file
+fi
+
+start 'Scala' "java Main"

@@ -1,12 +1,5 @@
 #!/bin/sh
 
-run () {
-  echo ===== up to $2 =====
-  time -p node np.js -u $1
-  echo
-}
+. ../run-helper.sh
 
-run 1000 1K
-run 1000000 1M
-run 10000000 10M
-run 100000000 100M
+start 'Node.js' 'node np.js'
