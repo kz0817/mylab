@@ -1,0 +1,23 @@
+apply plugin: 'java'
+apply plugin: 'application'
+mainClassName = 'anbutter.App'
+
+sourceCompatibility = '1.11'
+targetCompatibility = '1.11'
+
+
+repositories {
+  jcenter()
+}
+
+dependencies {
+  testCompile 'junit:junit:4.12'
+  compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.5'
+  compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.5'
+}
+
+run {
+  if (project.hasProperty('args')) {
+    args(project.args.split('\\s+'))
+  }
+}
