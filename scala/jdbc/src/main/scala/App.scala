@@ -68,6 +68,6 @@ object Main {
 
   def main(args: Array[String]) {
     Class.forName("org.sqlite.JDBC")
-    run(new Option(args))
+    run(Option(args))
   }
 }
