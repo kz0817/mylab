@@ -1,0 +1,16 @@
+- hosts: all
+  tasks:
+    - name: sqlite3
+      apt: name={{item}}
+      with_items:
+        - libsqlite3-0
+        - sqlite3
+
+    - name: sqlite3-dev
+      apt: name=libsqlite3-dev
+
+    - name: sqlite3 debug sysmbols
+      apt: name={{item}}
+      with_items:
+        - libsqlite3-0-dbgsym
+        - sqlite3
