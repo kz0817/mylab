@@ -1,0 +1,20 @@
+---
+- hosts: all
+  become: yes
+  tasks:
+    - apt_repository: repo='ppa:linuxuprising/java'
+
+    - name: Autoaccept license for Java11
+      debconf:
+        name: 'oracle-java11-installer'
+        question: 'shared/accepted-oracle-license-v1-2'
+        value: 'true'
+        vtype: 'select'
+
+    - name: Install Java
+      apt:
+        name: "{{ item }}"
+        update_cache: yes
+      with_items:
+        - oracle-java11-installer
+        - maven
