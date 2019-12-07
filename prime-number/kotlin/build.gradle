@@ -1,0 +1,24 @@
+buildscript {
+  ext.kotlin_version = '1.3.61'
+  repositories {
+    mavenCentral()
+  }
+  dependencies {
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+  }
+}
+
+apply plugin: "kotlin"
+apply plugin: "application"
+
+mainClassName = 'NpKt'
+
+defaultTasks 'run'
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+}
