@@ -7,11 +7,11 @@ import (
 
 func isPrimeNumber(primeNumbers []int, n int, upperLimit int) bool {
     for _, primeNum := range primeNumbers {
+        if primeNum * primeNum > n {
+            break
+        }
         if (n % primeNum) == 0 {
             return false
-        }
-        if (primeNum * primeNum) >= upperLimit {
-            break
         }
     }
     return true
@@ -24,9 +24,9 @@ func main() {
 
     fmt.Printf("Upper Limit: %d\n", *upperLimit)
 
-    primeNumbers := []int{2}
+    primeNumbers := []int{2, 3}
 
-    for n := 2; n < *upperLimit; n++ {
+    for n := 5; n < *upperLimit; n+=2 {
         if isPrimeNumber(primeNumbers, n, *upperLimit) {
             primeNumbers = append(primeNumbers, n)
         }
