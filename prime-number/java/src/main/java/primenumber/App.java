@@ -15,7 +15,7 @@ public class App {
 
   boolean isPrimeNumber(int n) {
     for (var pn : primeNumbers) {
-      if (pn * pn >= upperLimit) {
+      if (pn * pn > n) {
         return true;
       }
       if (n % pn == 0) {
