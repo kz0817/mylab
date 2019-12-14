@@ -2,4 +2,5 @@
 
 . ../run-helper.sh
 
-start 'C (-O3)' ./pn
+start 'C (fixed-length arary)' ./pn
+start 'C (realloc)' ./pn --realloc

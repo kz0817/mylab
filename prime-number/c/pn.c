@@ -9,12 +9,15 @@ const size_t BUF_SIZE = sizeof(int) * NUM_BUF;
 struct args {
     size_t upper_bound;
     int show_result;
+    int realloc;
 };
 
 static void parse_option(int argc, char **argv, struct args *args)
 {
     args->upper_bound = 100;
     args->show_result = 0;
+    args->realloc = 0;
+
     for (int i = 1; i < argc; i++) {
         const char *word = argv[i];
         if (strcmp(word, "-u") == 0) {
@@ -25,10 +28,14 @@ static void parse_option(int argc, char **argv, struct args *args)
         else if (strcmp(word, "-s") == 0) {
             args->show_result = 1;
         }
+        else if (strcmp(word, "--realloc") == 0) {
+            args->realloc = 1;
+        }
     }
 }
 
-static int is_prime_number(const int n, const int *prime_numbers, const size_t num_prime_numbers)
+static int is_prime_number(
+  const int n, const int *prime_numbers, const size_t num_prime_numbers)
 {
     for (size_t i = 0; i < num_prime_numbers; i++) {
         const int pn = prime_numbers[i];
@@ -40,15 +47,28 @@ static int is_prime_number(const int n, const int *prime_numbers, const size_t n
     return 1;
 }
 
-static void show_result(const int *prime_numbers, const size_t num_prime_numbers)
+static void show_prime_numbers(
+  const int *prime_numbers, const size_t num_prime_numbers)
 {
     for (size_t i = 0; i < num_prime_numbers; i++)
         printf("%d ", prime_numbers[i]);
     printf("\n");
 }
 
-static void run(int *prime_numbers, const struct args *args)
+static void show_result(
+  const struct args *args,
+  const int *prime_numbers, const size_t num_prime_numbers)
 {
+    printf("Count: %zd\n", num_prime_numbers);
+    if (args->show_result)
+        show_prime_numbers(prime_numbers, num_prime_numbers);
+}
+
+static void run_fixed_length_array(struct args *args)
+{
+    int *prime_numbers = malloc(BUF_SIZE);
+    assert(prime_numbers);
+
     size_t num_prime_numbers = 1;
     prime_numbers[0] = 2;
 
@@ -62,9 +82,28 @@ static void run(int *prime_numbers, const struct args *args)
     if (num_prime_numbers > NUM_BUF) {
         printf("*** WARNING *** Buffer overflow\n");
     }
-    printf("Count: %zd\n", num_prime_numbers);
-    if (args->show_result)
-        show_result(prime_numbers, num_prime_numbers);
+
+    show_result(args, prime_numbers, num_prime_numbers);
+}
+
+static void run_realloc(struct args *args)
+{
+    int *prime_numbers = realloc(NULL, sizeof(int));
+    assert(prime_numbers);
+
+    size_t num_prime_numbers = 1;
+    prime_numbers[0] = 2;
+    for (size_t n = 3; n < args->upper_bound; n += 2) {
+        if (is_prime_number(n, prime_numbers, num_prime_numbers)) {
+            const size_t size = sizeof(int) * (num_prime_numbers + 1);
+            prime_numbers = realloc(prime_numbers, size);
+            assert(prime_numbers);
+            prime_numbers[num_prime_numbers] = n;
+            num_prime_numbers++;
+        }
+    }
+
+    show_result(args, prime_numbers, num_prime_numbers);
 }
 
 int main(int argc, char *argv[])
@@ -73,14 +112,13 @@ int main(int argc, char *argv[])
     parse_option(argc, argv, &args);
     printf("Upper bound: %zd\n", args.upper_bound);
 
-    int *prime_numbers = malloc(BUF_SIZE);
-
-    if (prime_numbers == NULL) {
-        fprintf(stderr, "Failed to allocate memory: %zd\n", BUF_SIZE);
-        return EXIT_FAILURE;
+    if (args.realloc == 0) {
+        printf("Type: fixed-length array\n");
+        run_fixed_length_array(&args);
+    } else {
+        printf("Type: realloc\n");
+        run_realloc(&args);
     }
-
-    run(prime_numbers, &args);
 
     return EXIT_SUCCESS;
 }
