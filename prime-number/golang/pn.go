@@ -5,7 +5,7 @@ import (
     "flag"
 )
 
-func isPrimeNumber(primeNumbers []int, n int, upperLimit int) bool {
+func isPrimeNumber(primeNumbers []int, n int) bool {
     for _, primeNum := range primeNumbers {
         if primeNum * primeNum > n {
             break
@@ -27,7 +27,7 @@ func main() {
     primeNumbers := []int{2, 3}
 
     for n := 5; n < *upperLimit; n+=2 {
-        if isPrimeNumber(primeNumbers, n, *upperLimit) {
+        if isPrimeNumber(primeNumbers, n) {
             primeNumbers = append(primeNumbers, n)
         }
     }
