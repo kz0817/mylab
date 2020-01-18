@@ -1,0 +1,6 @@
+Package: whitecat-conf
+Version: 1.0.1
+Architecture: all
+Description: white cat
+Maintainer: Mr. X <mr.x@example.com>
+Depends: whitecat
