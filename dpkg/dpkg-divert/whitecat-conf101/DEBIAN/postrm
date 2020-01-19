@@ -1,0 +1,3 @@
+#!/bin/sh
+rm /etc/whitecat.conf
+dpkg-divert --package whitecat-conf --remove --rename /etc/whitecat.conf
