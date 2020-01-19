@@ -1,3 +1,6 @@
 #!/bin/sh
 
-dpkg-divert --package whitecat-conf --rename /etc/whitecat.conf
+echo "[preinst] " $0 $1 $2
+if [ upgrade != "$1" ]; then
+    dpkg-divert --package whitecat-conf --rename /etc/whitecat.conf
+fi
