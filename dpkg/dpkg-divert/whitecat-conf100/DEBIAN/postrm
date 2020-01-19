@@ -1,0 +1,7 @@
+#!/bin/sh
+
+echo "[postrm] " $1 $2 $3
+if [ remove = "$1" -o abort-install = "$1" -o disappear = "$1" ]; then
+    #rm /etc/whitecat.conf
+    dpkg-divert --package whitecat-conf --remove --rename /etc/whitecat.conf
+fi
