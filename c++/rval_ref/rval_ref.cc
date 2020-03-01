@@ -52,6 +52,10 @@ public:
 		return *this;
 	}
 
+    virtual ~X() {
+        printf("Desctructor: %s\n", name.c_str());
+    }
+
 	void print(void)
 	{
 		printf("val: %d\n", val);
