@@ -1,2 +1,2 @@
 CXXFLAGS = -std=c++17
-test1:
+all: test1 custom_deleter
