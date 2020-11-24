@@ -22,9 +22,23 @@ public class App {
         }
     }
 
-    private static boolean shouldInterrupt(final String[] args) {
+    private static class BusyLoop implements Runnable {
+        @Override
+        public void run() {
+            System.out.println("BusyLoop started");
+            long cnt = 0;
+            while (true) {
+                if (cnt % (100 * 1000 * 1000) == 0) {
+                    System.out.format("cnt: %d\n", cnt);
+                }
+                cnt++;
+            }
+        }
+    }
+
+    private static boolean has(final String[] args, final String target) {
         for (final var arg: args) {
-            if (arg.equals("-int")) {
+            if (arg.equals(target)) {
                 return true;
             }
         }
@@ -33,15 +47,19 @@ public class App {
 
     public static void main(final String[] args) {
         final ExecutorService executor = Executors.newSingleThreadExecutor();
-        final Future<?> future = executor.submit(new Cat());
-        final boolean doInterrupt = shouldInterrupt(args);
+        final boolean doInterrupt = has(args, "-int");
+        final boolean doBusyLoop = has(args, "-busyloop");
         System.out.format("Interrupt: %s\n", doInterrupt);
+        System.out.format("Mode: %s\n", doBusyLoop ? "BusyLoop" : "Cat");
+
+        final Future<?> future = executor.submit(doBusyLoop ? new BusyLoop() : new Cat());
+
         try {
             Thread.sleep(500);
             future.cancel(doInterrupt);
             System.out.println("main thread 1");
-            Thread.sleep(5000);
-        } catch( final InterruptedException e) {
+            Thread.sleep(100 * 1000);
+        } catch(final InterruptedException e) {
             e.printStackTrace();
         }
         System.out.println("main thread: exited");
