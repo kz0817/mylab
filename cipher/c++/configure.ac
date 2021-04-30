@@ -1,0 +1,15 @@
+AC_INIT([cipher], [0.0.1])
+AM_INIT_AUTOMAKE([foreign])
+
+AC_DISABLE_STATIC
+AC_PROG_LIBTOOL
+AC_PROG_CXX
+
+AC_CONFIG_MACRO_DIR([m4])
+AM_SILENT_RULES([yes])
+
+AC_CONFIG_FILES([
+  Makefile
+  src/Makefile
+])
+AC_OUTPUT
