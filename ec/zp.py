@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import math
+import copy
 
 class Element(object):
     def __init__(self, n, v):
@@ -85,6 +86,10 @@ class Element(object):
             v = v * lhs
         return v
 
+    def __eq__(lhs, rhs):
+        assert(isinstance(rhs, Element))
+        return lhs.v == rhs.v
+
     def __str__(self):
         return '%d(n=%d)' % (self.v, self.n)
 
@@ -166,17 +171,30 @@ class Curve(object):
         y = -phi*x - psi
         return Point(x, y)
 
-    def mutiply(self, k: int, base_point: Point) -> Point:
-        if k == 1:
-            return base_point
 
-        p = self.double(base_point)
-        if k == 2:
-            return p
+    @classmethod
+    def get_most_siginificant_active_bit(cls, v):
+        b = 0
+        while v != 0:
+            b = b + 1
+            v >>= 1
+        return b
 
-        for i in range(k-2):
-            p = self.add(p, base_point)
-        return p
+
+    def mutiply(self, k: int, p_in: Point) -> Point:
+        mask = 1
+        base = p_in
+        p_out = None
+        for i in range(self.get_most_siginificant_active_bit(k)):
+            if mask & k:
+                if p_out is None:
+                    p_out = copy.deepcopy(base)
+                else:
+                    p_out = self.add(p_out, base)
+            base = self.double(base)
+            mask <<= 1
+
+        return p_out
 
 
 def list_points(args):
