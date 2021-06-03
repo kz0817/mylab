@@ -237,6 +237,9 @@ def main():
     parser_op.set_defaults(function=operate)
 
     args = parser.parse_args()
+    if 'function' not in args:
+        parser.print_help()
+        return
     args.function(args)
 
 
