@@ -30,17 +30,47 @@ class Element(object):
         assert isinstance(rhs, int)
         return Element(lhs.n, lhs.v * rhs)
 
+    def inverse(self):
+        a = self.n
+        b = self.v
+        assert a >= b
+
+        # (x, y): a solution of ax + by = 1
+        x_prev = 1
+        y_prev = 0
+        x = 0
+        y = 1
+        r = b
+        while r > 1:
+            x_prev2 = x_prev
+            x_prev = x
+            y_prev2 = y_prev
+            y_prev = y
+
+            q = a // b
+            r = a % b
+            x = x_prev2 - q * x_prev
+            y = y_prev2 - q * y_prev
+
+            if r == 1:
+                break
+            elif r == 0:
+                msg = 'No element: %d / %d (mod %d)' % (lhs.v, rhs.v, lhs.n)
+                raise ArithmeticError(msg)
+
+            # prepare for the next iteration
+            a = b
+            b = r
+        return Element(self.n, y)
+
     def __truediv__(lhs, rhs):
         assert lhs.n == rhs.n
-        n = lhs.n
         if rhs.v == 0:
             raise ZeroDivisionError
+        if lhs.v == 0:
+            return Element(lhs.n, 0)
+        return lhs * rhs.inverse()
 
-        for v in range(n):
-            if ((v * rhs.v) % n) == (lhs.v % n):
-                return Element(n, v)
-        msg = 'No element: %d / %d (mod %d)' % (lhs.v, rhs.v, n)
-        raise ArithmeticError(msg)
 
     def __neg__(self):
         self.v *= -1
