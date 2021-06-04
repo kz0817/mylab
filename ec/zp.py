@@ -91,7 +91,7 @@ class Element(object):
         return lhs.v == rhs.v
 
     def __str__(self):
-        return '%d(n=%d)' % (self.v, self.n)
+        return '%d' % self.v
 
     def sqrt(self):
         ans = []
@@ -199,10 +199,11 @@ class Curve(object):
 
 def list_points(args):
     curve = Curve(args.order, args.a, args.b)
+    print('*** a: %d, b: %d, order: %d' % (args.a, args.b, args.order))
     for x in range(args.order):
         y2 = curve.y2(x)
         y = y2.sqrt()
-        print(x, y2, y)
+        print('x: %s, y^2: %s, y: %s' % (x, y2, y))
 
 
 def create_point(n, x_y):
