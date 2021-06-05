@@ -56,7 +56,7 @@ class Element(object):
             if r == 1:
                 break
             elif r == 0:
-                msg = 'No element: %d / %d (mod %d)' % (lhs.v, rhs.v, lhs.n)
+                msg = 'No element: %d / %d (mod %d)' % (self.n, self.v, self.n)
                 raise ArithmeticError(msg)
 
             # prepare for the next iteration
