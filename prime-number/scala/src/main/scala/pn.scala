@@ -1,14 +1,24 @@
+import scala.util.control.Breaks
+
 class PrimeNumber {
   val primeNumbers = new scala.collection.mutable.ArrayBuffer[Int]()
+  val b = new Breaks
 
   def isPrimeNumber(n: Int): Boolean = {
-    for (pn <- primeNumbers) {
-      if (pn * pn > n)
-        return true
-      if (n % pn == 0)
-        return false
+    var isPrime = true
+    b.breakable {
+      for (pn <- primeNumbers) {
+        if (pn * pn > n) {
+          isPrime = true
+          b.break
+        }
+        if (n % pn == 0) {
+          isPrime = false
+          b.break
+        }
+      }
     }
-    return true
+    return isPrime
   }
 
   def calc(upperLimit: Int): Unit = {
@@ -23,16 +33,16 @@ class PrimeNumber {
 
 class ArgParser(args: Array[String]) {
   var upperLimit = 0;
-  val it = args.toIterator
-  while (it hasNext) {
-    it next match {
-      case "-u" => upperLimit = it.next toInt
+  val it = args.iterator
+  while (it.hasNext) {
+    it.next match {
+      case "-u" => upperLimit = it.next.toInt
     }
   }
 }
 
 object Main {
-  def main(args: Array[String]) {
+  def main(args: Array[String]) = {
     val parser = new ArgParser(args)
     val pn = new PrimeNumber()
     pn.calc(parser.upperLimit)

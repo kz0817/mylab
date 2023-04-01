@@ -8,5 +8,4 @@ if [ -f $classpath_file ]; then
   echo source file $classpath_file
   . $classpath_file
 fi
-
 start 'Scala' "java Main"

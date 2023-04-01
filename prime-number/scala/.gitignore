@@ -1,2 +1,4 @@
 project/target
 target
+.bsp
+run-class-path.sh
