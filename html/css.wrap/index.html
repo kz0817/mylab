@@ -1,0 +1,43 @@
+<html>
+<head>
+<style>
+
+body {
+  width: 800px;
+  background-color: #aaa;
+}
+
+pre {
+  border-width: thin;
+  border-color: #c0c0c0;
+  border-style: solid;
+  background-color: #f0f0f0;
+  padding: 0.5em;
+  font-family: 'Monaco', 'Consolas', 'Courier New', Courier, monospace, sans-serif;
+  overflow: scroll;
+}
+
+pre.wrap {
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+</style>
+</head>
+
+<body>
+<pre class="wrap">
+root       41725       1  0 Apr01 ?        00:00:00   [lxc monitor] /var/lib/lxc deb12
+root       41730   41725  0 Apr01 ?        00:00:01     /sbin/init
+root       41808   41730  0 Apr01 ?        00:00:00       /lib/systemd/systemd-journald
+root       41840   41730  0 Apr01 ?        00:00:00       dhclient -4 -v -i -pf /run/dhclient.eth0.pid -lf /var/lib/dhcp/dhclient.eth0.leases -I -df /var/lib/dhcp/dhclient6.eth0.leases eth0
+</pre>
+
+<pre>
+root       41725       1  0 Apr01 ?        00:00:00   [lxc monitor] /var/lib/lxc deb12
+root       41730   41725  0 Apr01 ?        00:00:01     /sbin/init
+root       41808   41730  0 Apr01 ?        00:00:00       /lib/systemd/systemd-journald
+root       41840   41730  0 Apr01 ?        00:00:00       dhclient -4 -v -i -pf /run/dhclient.eth0.pid -lf /var/lib/dhcp/dhclient.eth0.leases -I -df /var/lib/dhcp/dhclient6.eth0.leases eth0
+</pre>
+
+</body>
+</html>
