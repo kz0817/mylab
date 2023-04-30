@@ -2,5 +2,5 @@
 
 . ../run-helper.sh
 
-start 'C (fixed-length arary)' ./pn
-start 'C (realloc)' ./pn --realloc
+start 'C (realloc): int' "./pn-int --realloc"
+start 'C (realloc): long' "./pn-long --realloc"

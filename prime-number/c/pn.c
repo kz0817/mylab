@@ -3,8 +3,20 @@
 #include <string.h>
 #include <assert.h>
 
+#ifdef VAR_TYPE_int
+  #define VAR_TYPE int
+  #define VAR_NAME "int"
+  #define VAR_FMT "%d"
+#endif
+
+#ifdef VAR_TYPE_long
+  #define VAR_TYPE long
+  #define VAR_NAME "long"
+  #define VAR_FMT "%ld"
+#endif
+
 const size_t NUM_BUF = 10 * 1000 * 1000;
-const size_t BUF_SIZE = sizeof(int) * NUM_BUF;
+const size_t BUF_SIZE = sizeof(VAR_TYPE) * NUM_BUF;
 
 struct args {
     size_t upper_bound;
@@ -35,10 +47,10 @@ static void parse_option(int argc, char **argv, struct args *args)
 }
 
 static int is_prime_number(
-  const int n, const int *prime_numbers, const size_t num_prime_numbers)
+  const VAR_TYPE n, const VAR_TYPE *prime_numbers, const size_t num_prime_numbers)
 {
     for (size_t i = 0; i < num_prime_numbers; i++) {
-        const int pn = prime_numbers[i];
+        const VAR_TYPE pn = prime_numbers[i];
         if (pn * pn > n)
             return 1;
         if (n % pn == 0)
@@ -48,16 +60,16 @@ static int is_prime_number(
 }
 
 static void show_prime_numbers(
-  const int *prime_numbers, const size_t num_prime_numbers)
+  const VAR_TYPE *prime_numbers, const size_t num_prime_numbers)
 {
     for (size_t i = 0; i < num_prime_numbers; i++)
-        printf("%d ", prime_numbers[i]);
+        printf(VAR_FMT " ", prime_numbers[i]);
     printf("\n");
 }
 
 static void show_result(
   const struct args *args,
-  const int *prime_numbers, const size_t num_prime_numbers)
+  const VAR_TYPE *prime_numbers, const size_t num_prime_numbers)
 {
     printf("Count: %zd\n", num_prime_numbers);
     if (args->show_result)
@@ -66,7 +78,7 @@ static void show_result(
 
 static void run_fixed_length_array(struct args *args)
 {
-    int *prime_numbers = malloc(BUF_SIZE);
+    VAR_TYPE *prime_numbers = malloc(BUF_SIZE);
     assert(prime_numbers);
 
     size_t num_prime_numbers = 1;
@@ -88,14 +100,14 @@ static void run_fixed_length_array(struct args *args)
 
 static void run_realloc(struct args *args)
 {
-    int *prime_numbers = realloc(NULL, sizeof(int));
+    VAR_TYPE *prime_numbers = realloc(NULL, sizeof(VAR_TYPE));
     assert(prime_numbers);
 
     size_t num_prime_numbers = 1;
     prime_numbers[0] = 2;
     for (size_t n = 3; n < args->upper_bound; n += 2) {
         if (is_prime_number(n, prime_numbers, num_prime_numbers)) {
-            const size_t size = sizeof(int) * (num_prime_numbers + 1);
+            const size_t size = sizeof(VAR_TYPE) * (num_prime_numbers + 1);
             prime_numbers = realloc(prime_numbers, size);
             assert(prime_numbers);
             prime_numbers[num_prime_numbers] = n;
@@ -110,6 +122,7 @@ int main(int argc, char *argv[])
 {
     struct args args;
     parse_option(argc, argv, &args);
+    printf("Var type: " VAR_NAME ", size: %zd\n", sizeof(VAR_TYPE));
     printf("Upper bound: %zd\n", args.upper_bound);
 
     if (args.realloc == 0) {
