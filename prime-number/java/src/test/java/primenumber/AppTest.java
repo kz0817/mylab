@@ -9,8 +9,8 @@ public class AppTest {
   public void test() {
     String[] args = {"-u", "10"};
     var parser = new ArgParser(args);
-    var app = new App(parser);
-    app.run();
-    assertEquals(app.primeNumbers.size(), 4);
+    var app = new App();
+    app.run(parser);
+    assertEquals(app.count, 4);
   }
 }
