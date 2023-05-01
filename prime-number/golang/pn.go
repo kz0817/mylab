@@ -5,7 +5,11 @@ import (
     "flag"
 )
 
-func isPrimeNumber(primeNumbers []int, n int) bool {
+type Number interface {
+    int32 | int64
+}
+
+func isPrimeNumber[T Number](primeNumbers []T, n T) bool {
     for _, primeNum := range primeNumbers {
         if primeNum * primeNum > n {
             break
@@ -17,25 +21,39 @@ func isPrimeNumber(primeNumbers []int, n int) bool {
     return true
 }
 
-func main() {
-    upperLimit := flag.Int("u", 100, "Upper Limit")
-    showResult := flag.Bool("s", false, "Show prime numbers")
-    flag.Parse()
+func run[T Number](upperLimit int, showResult bool) {
+    primeNumbers := []T{2}
 
-    fmt.Printf("Upper Limit: %d\n", *upperLimit)
-
-    primeNumbers := []int{2, 3}
-
-    for n := 5; n < *upperLimit; n+=2 {
-        if isPrimeNumber(primeNumbers, n) {
-            primeNumbers = append(primeNumbers, n)
+    for n := 3; n < upperLimit; n+=2 {
+        _n := T(n)
+        if isPrimeNumber(primeNumbers, _n) {
+            primeNumbers = append(primeNumbers, _n)
         }
     }
 
     fmt.Printf("Count: %d\n",  len(primeNumbers))
-    if (*showResult) {
+    if (showResult) {
         for _, primeNum := range primeNumbers {
             fmt.Printf("%d\n", primeNum)
         }
+    }
+}
+
+func main() {
+    var upperLimit int
+    var varTypeInt64 bool
+    var showResult bool
+    flag.IntVar(&upperLimit, "u", 100, "Upper Limit")
+    flag.BoolVar(&varTypeInt64, "int64", false, "use long")
+    flag.BoolVar(&showResult, "s", false, "Show prime numbers")
+    flag.Parse()
+
+    fmt.Printf("Upper Limit: %d\n", upperLimit)
+    if (varTypeInt64) {
+        fmt.Println("VarType: int64")
+        run[int64](upperLimit, showResult)
+    } else {
+        fmt.Println("VarType: int32")
+        run[int32](upperLimit, showResult)
     }
 }
