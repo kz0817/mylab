@@ -19,7 +19,7 @@ const size_t NUM_BUF = 10 * 1000 * 1000;
 const size_t BUF_SIZE = sizeof(VAR_TYPE) * NUM_BUF;
 
 struct args {
-    size_t upper_bound;
+    int upper_bound;
     int show_result;
     int realloc;
 };
@@ -103,9 +103,9 @@ static void run_realloc(struct args *args)
     VAR_TYPE *prime_numbers = realloc(NULL, sizeof(VAR_TYPE));
     assert(prime_numbers);
 
-    size_t num_prime_numbers = 1;
+    int num_prime_numbers = 1;
     prime_numbers[0] = 2;
-    for (size_t n = 3; n < args->upper_bound; n += 2) {
+    for (int n = 3; n < args->upper_bound; n += 2) {
         if (is_prime_number(n, prime_numbers, num_prime_numbers)) {
             const size_t size = sizeof(VAR_TYPE) * (num_prime_numbers + 1);
             prime_numbers = realloc(prime_numbers, size);
@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
     struct args args;
     parse_option(argc, argv, &args);
     printf("Var type: " VAR_NAME ", size: %zd\n", sizeof(VAR_TYPE));
-    printf("Upper bound: %zd\n", args.upper_bound);
+    printf("Upper bound: %d\n", args.upper_bound);
 
     if (args.realloc == 0) {
         printf("Type: fixed-length array\n");
