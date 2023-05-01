@@ -5,3 +5,4 @@ cargo build --release
 . ../run-helper.sh
 
 start 'Rust' "target/release/prime_number"
+start 'Rust' "target/release/prime_number --i64"
