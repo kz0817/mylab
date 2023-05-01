@@ -1,19 +1,58 @@
-data class Args(var upper: Int = 100, var showResult: Boolean = false)
+data class Args(var upper: Int = 100, var showResult: Boolean = false,
+                var varTypeLong: Boolean = false)
 
-fun showResult(numbers: Collection<Int>, args: Args) {
+fun <T> showResult(numbers: Collection<T>, args: Args) {
     println(numbers.size)
     if (args.showResult)
         println(numbers)
 }
 
-fun isPrimeNumber(n: Int, primeNumbers: List<Int>): Boolean {
-    for (primeNumber in primeNumbers) {
-        if (primeNumber * primeNumber > n)
-            return true
-        if (n % primeNumber == 0)
-            return false
+class PrimeNumberInt {
+    val primeNumbers = mutableListOf(2)
+
+    fun isPrimeNumber(n: Int): Boolean {
+        for (pn in primeNumbers) {
+            if (pn * pn > n)
+                return true
+            if (n % pn == 0)
+                return false
+        }
+        return true
     }
-    return true
+
+    fun run(args: Args) {
+        var n = 3
+        while (n < args.upper) {
+            if (isPrimeNumber(n))
+                primeNumbers.add(n)
+            n += 2
+        }
+        showResult(primeNumbers, args)
+    }
+}
+
+class PrimeNumberLong {
+    val primeNumbers = mutableListOf(2L)
+
+    fun isPrimeNumber(n: Long): Boolean {
+        for (pn in primeNumbers) {
+            if (pn * pn > n)
+                return true
+            if (n % pn == 0L)
+                return false
+        }
+        return true
+    }
+
+    fun run(args: Args) {
+        var n = 3L
+        while (n < args.upper) {
+            if (isPrimeNumber(n))
+                primeNumbers.add(n)
+            n += 2L
+        }
+        showResult(primeNumbers, args)
+    }
 }
 
 fun parseArgs(argArr: Array<String>): Args {
@@ -45,6 +84,9 @@ fun parseArgs(argArr: Array<String>): Args {
             "-s", "--show" -> {
                 args.showResult = true
             }
+            "--long" -> {
+                args.varTypeLong = true
+            }
         }
         loadNext()
     }
@@ -52,15 +94,11 @@ fun parseArgs(argArr: Array<String>): Args {
 }
 
 fun main(argArr: Array<String>) {
-    val primeNumbers = mutableListOf(2, 3)
     val args = parseArgs(argArr)
     println("Upper bound: " + args.upper)
-
-    var n = 5
-    while (n < args.upper) {
-        if (isPrimeNumber(n, primeNumbers))
-            primeNumbers.add(n)
-        n += 2
+    if (args.varTypeLong) {
+        PrimeNumberLong().run(args)
+    } else {
+        PrimeNumberInt().run(args)
     }
-    showResult(primeNumbers, args)
 }
