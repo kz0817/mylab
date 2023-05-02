@@ -1,12 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 class PrimeNumber {
-
-   function __construct() {
-       $this->prime_numbers = [];
-   }
-
-   function is_prime_number($n) {
+    private array $prime_numbers = [];
+    private function is_prime_number(int $n): bool {
         foreach ($this->prime_numbers as $np) {
             if ($np * $np > $n)
                 return true;
@@ -16,7 +14,7 @@ class PrimeNumber {
         return true;
     }
 
-    function calc($upper_limit) {
+    public function calc(int $upper_limit): void {
 
         for ($n = 2; $n <= $upper_limit; $n++) {
             if ($this->is_prime_number($n))
@@ -26,14 +24,14 @@ class PrimeNumber {
         echo "Count: " . count($this->prime_numbers) . "\n";
     }
 
-    function show() {
+    public function show(): void {
         foreach ($this->prime_numbers as $pn)
             echo $pn . "\n";
     }
 
 }
 
-function parseArg() {
+function parseArg(): array {
 
     $opt = [
         "upper_limit" => 0,
@@ -69,8 +67,6 @@ function parseArg() {
 $args = parseArg();
 
 $pn = new PrimeNumber();
-$pn->calc($args["upper_limit"]);
+$pn->calc((int)$args["upper_limit"]);
 if ($args["show"])
     $pn->show();
-
-?>
