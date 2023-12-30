@@ -1,0 +1,13 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+application {
+    mainClass = 'ann.Ann'
+}
+
+dependencies {
+    implementation project(':myann')
+    annotationProcessor project(':myann')
+}
